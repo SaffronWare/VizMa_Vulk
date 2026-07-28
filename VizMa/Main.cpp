@@ -5,6 +5,37 @@
 // creating a class name for our window
 constexpr wchar_t CLASS_NAME[] = L"this is MY CLASS!";
 
+
+void OnSize(HWND hwnd, UINT flag, int width, int height)
+{
+
+}
+
+// Callback thst DispatchMessage calls once this windowproc is assigned to the window
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int height;
+	int width;
+	switch (uMsg)
+	{
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+
+	case WM_SIZE:
+		width = LOWORD(lParam);
+		height = HIWORD(lParam);
+		OnSize(hwnd, (UINT)wParam, width, height);
+		break;
+	
+	}
+
+
+
+	// default protocal
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
 // hInstance is basically program id, prev instance irrelevant is garbage from old windows, 
 // pCmdLine = parameters in the command used to launch app, ncmdShow=number of the show state cmd requested
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
@@ -21,7 +52,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		0, // defualt stlye
 		CLASS_NAME,
 		L"My Window Name!!!",
-		WS_OVERLAPPED_WINDOW,
+		WS_OVERLAPPEDWINDOW,
 
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 		NULL,
@@ -35,7 +66,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		return 0;
 	}
 
-	ShowWindow(hwnd, nCmdShow)
+	ShowWindow(hwnd, nCmdShow);
+	
+	MSG msg = {};
+	
+	// Get Message is = 0 if the message is WM_QUIT
+	while (GetMessage(&msg, NULL, 0, 0) > 0)
+	{
+		TranslateMessage(&msg);
+		DispatchMessageW(&msg);
+
+	}
+
+	return 0;
 }
+
 
 

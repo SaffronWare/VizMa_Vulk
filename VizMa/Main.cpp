@@ -1,16 +1,15 @@
 ﻿#pragma once
 #define UNICODE // so windows knows what to take
 #define VK_USE_PLATFORM_WIN32_KHR // so vulkan knows im using win32 instead of anything else like a normal person
+#define DEBUG
 #include <windows.h>
 #include <vulkan/vulkan.hpp>
 
 #include <iostream>
 #include <stdexcept>
+#include <array>
 
 // creating a class name for our window
-
-
-
 constexpr wchar_t CLASS_NAME[] = L"this is MY CLASS!";
 
 
@@ -48,6 +47,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 // pCmdLine = parameters in the command used to launch app, ncmdShow=number of the show state cmd requested
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+
+#ifdef DEBUG
+
+	AllocConsole();
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stderr);
+
+	std::cout << "testing console cout\n";
+	std::cerr << "testing console cerr\n";
+#endif
+
+	
+
 	// creating our window's class. Basically a template for what protocol our window uses, what instance handle
 	WNDCLASSW wc = {};
 	wc.lpfnWndProc = WindowProc; // protocol used (function that defines the windows behavior)
@@ -115,6 +128,31 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	// because win32 needs hInstance, classname to identify classes, vulkan mirrors this
 	vkSurfaceCreateInfo.hinstance = hInstance;
 
+	// the gpu were communicating
+	VkPhysicalDevice vkDevice = VK_NULL_HANDLE;
+	uint32_t vkNumDevices = 0;
+	// first get the number of devices
+	vkEnumeratePhysicalDevices(vkInstance, &vkNumDevices, nullptr);
+
+	// if no devices somethings going fucking wrong and were running ona  ti84
+	if (vkNumDevices == 0)
+	{
+		std::cerr << "No physical devices detected!\n";
+	}
+
+	std::vector<VkPhysicalDevice> vkDevices(vkNumDevices);
+
+	// next fill an array with the devices
+	vkEnumeratePhysicalDevices(vkInstance, &vkNumDevices, vkDevices.data());
+
+	
+	
+	for (VkPhysicalDevice& _vkDevice : vkDevices)
+	{
+		std::cout << _vkDevice << std::endl;
+	}
+
+
 
 	
 
@@ -138,8 +176,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	}
 
+	// cleanup
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
-	DestroyWindow(hwnd);
+	vkDestroyInstance(vkInstance, nullptr);
 
 	return 0;
 }

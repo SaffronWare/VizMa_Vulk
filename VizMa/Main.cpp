@@ -2,15 +2,24 @@
 #define UNICODE // so windows knows what to take
 #define VK_USE_PLATFORM_WIN32_KHR // so vulkan knows im using win32 instead of anything else like a normal person
 #define DEBUG
-#include <windows.h>
+
+#ifdef DEBUG
+#define LOG(x) std::cout << x << std::endl
+#define CERR(x) std::cerr << x << std::endl
+#else
+#define LOG(x)
+#define CERR(x)
+#endif
+
+#include "Window.h"
 #include <vulkan/vulkan.hpp>
 
 #include <iostream>
 #include <stdexcept>
 #include <array>
+#include <vector>
 
-// creating a class name for our window
-constexpr wchar_t CLASS_NAME[] = L"this is MY CLASS!";
+const wchar_t* APPLICATION_TITLE = L"VizMa";
 
 
 void OnSize(HWND hwnd, UINT flag, int width, int height)
@@ -18,76 +27,46 @@ void OnSize(HWND hwnd, UINT flag, int width, int height)
 
 }
 
-// Callback thst DispatchMessage calls once this windowproc is assigned to the window
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+bool vkDeviceIsValid(VkPhysicalDevice& _vkDevice)
 {
-	int height;
-	int width;
-	switch (uMsg)
-	{
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
+	// proprties = name,type, supported vulkan version
+	VkPhysicalDeviceProperties vkDeviceProperties;
+	vkGetPhysicalDeviceProperties(_vkDevice, &vkDeviceProperties);
 
-	case WM_SIZE:
-		width = LOWORD(lParam);
-		height = HIWORD(lParam);
-		OnSize(hwnd, (UINT)wParam, width, height);
-		break;
-	
-	}
+	// gives support details for optional features
+	VkPhysicalDeviceFeatures vkDeviceFeatures;
+	vkGetPhysicalDeviceFeatures(_vkDevice, &vkDeviceFeatures);
 
+	LOG((vkDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU));
 
-
-	// default protocal
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	return (vkDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
 }
 
-// hInstance is basically program id, prev instance irrelevant is garbage from old windows, 
-// pCmdLine = parameters in the command used to launch app, ncmdShow=number of the show state cmd requested
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
 
 #ifdef DEBUG
-
 	AllocConsole();
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stderr);
-
-	std::cout << "testing console cout\n";
-	std::cerr << "testing console cerr\n";
-#endif
-
-	
-
-	// creating our window's class. Basically a template for what protocol our window uses, what instance handle
-	WNDCLASSW wc = {};
-	wc.lpfnWndProc = WindowProc; // protocol used (function that defines the windows behavior)
-	wc.hInstance = hInstance; // handle of applicaiton that owns the class 
-	wc.lpszClassName = CLASS_NAME;
-
-	RegisterClass(&wc); // tells windows this class exists and to remeber it
-
-	HWND hwnd = CreateWindowEx(
-		0, // defualt stlye
-		CLASS_NAME,
-		L"My Window Name!!!",
-		WS_OVERLAPPEDWINDOW,
-
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL,
-		NULL,
-		hInstance,
-		NULL
-	);
-
-	if (hwnd == NULL)
+	FILE* _ = nullptr;
+	if (freopen("CONOUT$", "w", stdout) == NULL)
 	{
-		return 0;
+		throw std::runtime_error("FAILED TO SET STDOUT STREAM\n");
+	}
+	if (freopen("CONIN$", "r", stdin) == NULL)
+	{
+		throw std::runtime_error("FAILED TO SET STDIN STREAM\n");
+	}
+	if (freopen("CONOUT$", "w", stderr) == NULL)
+	{
+		throw std::runtime_error("FAILED TO SET STDCERR STREAM\n");
 	}
 
+	LOG("testing console cout\n");
+	CERR("testing console cerr\n");
+#endif
 	
+	Window window = Window(hInstance, nCmdShow, APPLICATION_TITLE);
 
 	// basically contains metadata about what version of vulkan and stuff im ussing
 	// fully optional struct but stuf fliek api version can help for vulkan optimizations!
@@ -123,7 +102,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	// info for surface creation
 	VkWin32SurfaceCreateInfoKHR  vkSurfaceCreateInfo = {};
 	vkSurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	vkSurfaceCreateInfo.hwnd = hwnd;
+	vkSurfaceCreateInfo.hwnd = window.getWindowHandle();
 	// altough hwnd is enough to identify window,
 	// because win32 needs hInstance, classname to identify classes, vulkan mirrors this
 	vkSurfaceCreateInfo.hinstance = hInstance;
@@ -137,20 +116,32 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	// if no devices somethings going fucking wrong and were running ona  ti84
 	if (vkNumDevices == 0)
 	{
-		std::cerr << "No physical devices detected!\n";
+		throw std::runtime_error("No physical devices detected!\n");
 	}
 
 	std::vector<VkPhysicalDevice> vkDevices(vkNumDevices);
 
 	// next fill an array with the devices
 	vkEnumeratePhysicalDevices(vkInstance, &vkNumDevices, vkDevices.data());
-
-	
 	
 	for (VkPhysicalDevice& _vkDevice : vkDevices)
 	{
-		std::cout << _vkDevice << std::endl;
+		LOG(_vkDevice);
+
+		if (vkDeviceIsValid(_vkDevice))
+		{
+			// do some stuff
+			vkDevice = _vkDevice;
+			break;
+		}
 	}
+
+	if (vkDevice == VK_NULL_HANDLE)
+	{
+		throw std::runtime_error("No valid physical device selected!\n");
+	}
+
+
 
 
 
@@ -164,17 +155,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		throw std::runtime_error("Couldn't create vkSurface\n");
 	}
 	
-	ShowWindow(hwnd, nCmdShow);
 	
-	MSG msg = {};
-	
-	// Get Message is = 0 if the message is WM_QUIT
-	while (GetMessage(&msg, NULL, 0, 0) > 0)
-	{
-		TranslateMessage(&msg);
-		DispatchMessageW(&msg);
-
-	}
+	window.loop();
 
 	// cleanup
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);

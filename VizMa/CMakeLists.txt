@@ -1,13 +1,17 @@
-﻿# CMakeList.txt : CMake project for VizMa_Vulk, include source and define
-# project specific logic here.
-#
+﻿
 cmake_minimum_required(VERSION 4.3)
 
-# Add source to this project's executable.
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
 add_executable (VizMa WIN32 "Main.cpp" )
+
+target_include_directories(VizMa PRIVATE ${VULKAN_INCLUDE_DIR})
+target_link_libraries(VizMa PRIVATE "${VULKAN_LIB_DIR}/vulkan-1.lib")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VizMa PROPERTY CXX_STANDARD 20)
 endif()
 
-# TODO: Add tests and install targets if needed.

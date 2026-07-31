@@ -2,26 +2,26 @@
 #include <Windows.h>
 #include <stdexcept>
 
-constexpr wchar_t* WINDOW_CLASS_NAME = L"Window Class";
+constexpr const char* WINDOW_CLASS_NAME = "Window Class";
 
 
 class Window
 {
 private:
 
-	LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	///LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 public:
-	Window(HINSTANCE hInstance, int nCmdShow, const wchar_t* app_title);
+	Window(HINSTANCE hInstance, int nCmdShow, const char* app_title);
 	~Window();
 
 	int loop();
 
-	HWND getWindowHandle();
-	HINSTANCE getWindowInstance();
+	HWND getWindowHandle() const;
+	HINSTANCE getWindowInstance() const;
 
 private:
-	static void RegisterWindowClass();
+	static void RegisterWindowClass(HINSTANCE hinstance);
 
 	static WNDCLASS wndclass;
 	static bool class_registered;
@@ -29,5 +29,5 @@ private:
 	HINSTANCE hinstance = NULL;
 	HWND hwnd = NULL;
 
-	const wchar_t* wnd_title;
+	const char* wnd_title;
 };

@@ -1,7 +1,10 @@
 #include "Window.h"
 
+bool Window::class_registered = false;
+WNDCLASS Window::wndclass = static_cast<WNDCLASS>(0);
 
-LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int height;
 	int width;
@@ -14,13 +17,13 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	case WM_SIZE:
 		width = LOWORD(lParam);
 		height = HIWORD(lParam);
-		OnSize(hwnd, (UINT)wParam, width, height);
+		//OnSize(hwnd, (UINT)wParam, width, height);
 		break;
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-static Window::RegisterWindowClass()
+void Window::RegisterWindowClass(HINSTANCE hinstance)
 {
 	if (!class_registered)
 	{
@@ -32,16 +35,15 @@ static Window::RegisterWindowClass()
 	}
 }
 
-Window::Window(HINSTANCE hInstance, int nCmdShow, const wchar_t* app_title) :
+Window::Window(HINSTANCE hInstance, int nCmdShow, const char* app_title) :
 	hinstance(hInstance),
 	wnd_title(app_title)
 {
-	RegisterWindowClass();
-
+	RegisterWindowClass(hInstance);
 
 	hwnd = CreateWindowEx(
 		0,
-		CLASS_NAME,
+		WINDOW_CLASS_NAME,
 		app_title,
 		WS_OVERLAPPEDWINDOW,
 
@@ -54,7 +56,7 @@ Window::Window(HINSTANCE hInstance, int nCmdShow, const wchar_t* app_title) :
 
 	if (hwnd == NULL)
 	{
-		throw std::runtime_error("FAILED TO CREATE WINDOW\n")
+		throw std::runtime_error("FAILED TO CREATE WINDOW\n");
 	}
 
 	ShowWindow(hwnd, nCmdShow);
@@ -71,7 +73,7 @@ int Window::loop()
 
 	while (true)
 	{
-		while PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE)
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
@@ -85,12 +87,12 @@ int Window::loop()
 	}
 }
 
-HWND Window::getWindowHandle()
+HWND Window::getWindowHandle() const
 {
 	return hwnd;
 }
 
-HINSTANCE Window::getWindowInstance()
+HINSTANCE Window::getWindowInstance() const
 {
 	return hinstance;
 }

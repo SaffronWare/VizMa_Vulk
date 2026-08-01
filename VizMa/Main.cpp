@@ -1,7 +1,4 @@
 ﻿#pragma once
-#define UNICODE // so windows knows what to take
-#define VK_USE_PLATFORM_WIN32_KHR // so vulkan knows im using win32 instead of anything else like a normal person
-
 
 #include "DEBUG.h"
 #include "Window.h"
@@ -20,7 +17,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	InitDebugConsole();
 	Window window = Window(hInstance, nCmdShow, wAPPLICATION_TITLE);
-	//VulkanContext context(window, ", 1, 0, 0);
+	VulkanContext context(window, wAPPLICATION_TITLE, 1, 0, 0);
 	window.loop();
 
 	

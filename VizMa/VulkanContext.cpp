@@ -112,7 +112,7 @@ void VulkanContext::GetPhysicalDevice()
 
 	if (scoredDevices.size() > 0u)
 	{
-		vkPhysicalDevice = (*scoredDevices.cend()).second;
+		vkPhysicalDevice = (*scoredDevices.rbegin()).second;
 	}
 
 	if (vkPhysicalDevice == VK_NULL_HANDLE)

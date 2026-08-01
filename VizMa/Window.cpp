@@ -4,7 +4,7 @@ bool Window::class_registered = false;
 WNDCLASS Window::wndclass = static_cast<WNDCLASS>(0);
 
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int height;
 	int width;
@@ -73,7 +73,8 @@ int Window::loop()
 
 	while (true)
 	{
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
+		LOG("yayyy");
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);

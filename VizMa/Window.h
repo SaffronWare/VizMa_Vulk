@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <stdexcept>
+#include "DEBUG.h"
 
 constexpr const char* WINDOW_CLASS_NAME = "Window Class";
 
@@ -9,7 +10,7 @@ class Window
 {
 private:
 
-	///LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 public:
 	Window(HINSTANCE hInstance, int nCmdShow, const char* app_title);

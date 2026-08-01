@@ -1,6 +1,13 @@
 #include "VulkanContext.h"
 
 
+
+bool QueueFamilyIndices::isComplete()
+{
+	return graphicsFamily.has_value();
+}
+
+
 void VulkanContext::PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver)
 {
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -58,8 +65,10 @@ bool VulkanContext::IsPhysicalDeviceValid(const VkPhysicalDevice& device) const 
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-	// for now always true
-	return true;
+
+
+	// for now first part always true
+	return true && findQueueFamilies(device).isComplete();
 }
 
 int VulkanContext::ScorePhysicalDevice(const VkPhysicalDevice& device) const
@@ -121,14 +130,53 @@ void VulkanContext::GetPhysicalDevice()
 	}
 }
 
+QueueFamilyIndices VulkanContext::findQueueFamilies(VkPhysicalDevice device) const
+{
+	QueueFamilyIndices indices;
+
+	uint32_t vkNumQueueFamilies;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &vkNumQueueFamilies, nullptr);
+
+	std::vector<VkQueueFamilyProperties> vkQueueFamilies(vkNumQueueFamilies);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &vkNumQueueFamilies, vkQueueFamilies.data());
+
+	int i = 0;
+	for (const VkQueueFamilyProperties& vkQueueFamily : vkQueueFamilies)
+	{
+		if (vkQueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			indices.graphicsFamily = i;
+		}
+
+		if (indices.isComplete())
+		{
+			break;
+		}
+
+		i += 1;
+	}
+
+	return indices;
+}
+
+void VulkanContext::CreateLogicalDevice()
+{
+	QueueFamilyIndices indices = findQueueFamilies(vkPhysicalDevice);
+
+	VkDeviceQueueCreateInfo queueCreateInfo{};
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	queueCreateInfo.queueCount = 1;
+}
+
+
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver)
 {
 	PopulateAppInfo(title, version_major, version_minor, sub_ver);
 	CreateInstance();
 	CreateWindowSurfaceWin32(window);
 	GetPhysicalDevice();
-
-
+	CreateLogicalDevice();
 }
 
 VulkanContext::~VulkanContext()

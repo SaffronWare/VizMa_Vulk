@@ -3,10 +3,18 @@
 #include <vulkan/vulkan.hpp>
 
 #include <map>
+#include <optional>
 
 
 #include "Window.h"
 #include "DEBUG.h"
+
+struct QueueFamilyIndices
+{
+	std::optional<uint32_t> graphicsFamily;
+
+	bool isComplete();
+};
 
 class VulkanContext
 {
@@ -18,12 +26,18 @@ private:
 	void CreateInstance();
 	void CreateWindowSurfaceWin32(const Window& window);
 	void GetPhysicalDevice();
+	void CreateLogicalDevice();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
+
+	VkApplicationInfo appInfo{};
+
 	VkInstance vkInstance = VK_NULL_HANDLE;
 	VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
 	VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
-	VkApplicationInfo appInfo{};
+	VkDevice vkLogicalDevice = VK_NULL_HANDLE;
+	
 };

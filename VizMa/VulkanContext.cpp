@@ -51,23 +51,34 @@ void VulkanContext::CreateWindowSurfaceWin32(const Window& window)
 	}
 }
 
-/*
-* bool vkDeviceIsValid(VkPhysicalDevice& _vkDevice)
-{
-	// proprties = name,type, supported vulkan version
-	VkPhysicalDeviceProperties vkDeviceProperties;
-	vkGetPhysicalDeviceProperties(_vkDevice, &vkDeviceProperties);
 
-	// gives support details for optional features
-	VkPhysicalDeviceFeatures vkDeviceFeatures;
-	vkGetPhysicalDeviceFeatures(_vkDevice, &vkDeviceFeatures);
+bool VulkanContext::IsPhysicalDeviceValid(const VkPhysicalDevice& device) const {
+	VkPhysicalDeviceProperties deviceProperties;
+	VkPhysicalDeviceFeatures deviceFeatures;
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-	LOG((vkDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU));
-
-	return (vkDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
+	// for now always true
+	return true;
 }
 
-*/
+int VulkanContext::ScorePhysicalDevice(const VkPhysicalDevice& device) const
+{
+	int score = 0;
+
+	VkPhysicalDeviceProperties deviceProperties;
+	VkPhysicalDeviceFeatures deviceFeatures;
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+	if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+	{
+		score += 1000;
+	}
+
+	return score;
+
+}
 
 void VulkanContext::GetPhysicalDevice()
 {
@@ -86,16 +97,22 @@ void VulkanContext::GetPhysicalDevice()
 
 	vkEnumeratePhysicalDevices(vkInstance, &vkNumDevices, vkPhysicalDevices.data());
 
+	std::multimap<int, VkPhysicalDevice> scoredDevices;
+
 	for (VkPhysicalDevice& _vkPhysicalDevice : vkPhysicalDevices)
 	{
 		LOG(_vkPhysicalDevice);
 
-		if (true)
+		if (IsPhysicalDeviceValid(_vkPhysicalDevice))
 		{
 	
-			vkPhysicalDevice = _vkPhysicalDevice;
-			break;
+			scoredDevices.insert({ ScorePhysicalDevice(_vkPhysicalDevice), _vkPhysicalDevice });
 		}
+	}
+
+	if (scoredDevices.size() > 0u)
+	{
+		vkPhysicalDevice = (*scoredDevices.cend()).second;
 	}
 
 	if (vkPhysicalDevice == VK_NULL_HANDLE)

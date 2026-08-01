@@ -73,7 +73,6 @@ int Window::loop()
 
 	while (true)
 	{
-		LOG("yayyy");
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);

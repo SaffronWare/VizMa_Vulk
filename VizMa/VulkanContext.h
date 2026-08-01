@@ -2,6 +2,8 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
 
+#include <map>
+
 
 #include "Window.h"
 #include "DEBUG.h"
@@ -16,6 +18,9 @@ private:
 	void CreateInstance();
 	void CreateWindowSurfaceWin32(const Window& window);
 	void GetPhysicalDevice();
+
+	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
+	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
 	VkInstance vkInstance = VK_NULL_HANDLE;
 	VkSurfaceKHR vkSurface = VK_NULL_HANDLE;

@@ -4,7 +4,7 @@
 
 bool QueueFamilyIndices::isComplete()
 {
-	return graphicsFamily.has_value();
+	return graphicsFamily.has_value() && presentFamily.has_value();
 }
 
 bool PresentDeviceExtensions::isComplete()
@@ -74,7 +74,7 @@ PresentDeviceExtensions VulkanContext::peekPhysicalDeviceExtensions(const VkPhys
 
 	for (const auto& vkDeviceExtension : vkDeviceExtensions)
 	{
-		if (vkDeviceExtension.extensionName == VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+		if (std::equal(std::begin(vkDeviceExtension.extensionName), std::end(vkDeviceExtension.extensionName), std::begin(VK_KHR_SWAPCHAIN_EXTENSION_NAME)))
 		{
 			extensions_found.khr_swapchain_extension = true;
 		}
@@ -172,6 +172,12 @@ QueueFamilyIndices VulkanContext::findPhysicalDeviceQueueFamilies(const VkPhysic
 		{
 			indices.graphicsFamily = i;
 		}
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, vkSurface, &presentSupport);
+		if (presentSupport)
+		{
+			indices.presentFamily = i;
+		}
 
 		if (indices.isComplete())
 		{
@@ -188,19 +194,27 @@ void VulkanContext::CreateLogicalDevice()
 {
 	QueueFamilyIndices indices = findPhysicalDeviceQueueFamilies(vkPhysicalDevice);
 
+	std::vector<VkDeviceQueueCreateInfo> vkQueueCreateInfos;
+	std::set<uint32_t> vkUniqueQueueIndices = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
-	VkDeviceQueueCreateInfo vkQueueCreateInfo{};
-	vkQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	vkQueueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	vkQueueCreateInfo.queueCount = 1;
-	vkQueueCreateInfo.pQueuePriorities = &graphicsQueuePriority;
+	float vkQueuePriority = 1.0f;
+	for (uint32_t vkQueueIndex : vkUniqueQueueIndices)
+	{
+		VkDeviceQueueCreateInfo vkQueueCreateInfo{};
+		vkQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		vkQueueCreateInfo.queueFamilyIndex = vkQueueIndex;
+		vkQueueCreateInfo.queueCount = 1;
+		vkQueueCreateInfo.pQueuePriorities = &vkQueuePriority;
+		vkQueueCreateInfos.push_back(vkQueueCreateInfo);
+	}
 
 	VkPhysicalDeviceFeatures vkDeviceFeatures{};
 
+	
 	VkDeviceCreateInfo vkDeviceCreationInfo{};
 	vkDeviceCreationInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	vkDeviceCreationInfo.queueCreateInfoCount = 1;
-	vkDeviceCreationInfo.pQueueCreateInfos = &vkQueueCreateInfo;
+	vkDeviceCreationInfo.queueCreateInfoCount = static_cast<uint32_t>(vkUniqueQueueIndices.size());
+	vkDeviceCreationInfo.pQueueCreateInfos = vkQueueCreateInfos.data();
 	vkDeviceCreationInfo.pEnabledFeatures = &vkDeviceFeatures;
 	vkDeviceCreationInfo.enabledExtensionCount = 1;
 	vkDeviceCreationInfo.ppEnabledExtensionNames = requiredDeviceExtensions;
@@ -210,6 +224,7 @@ void VulkanContext::CreateLogicalDevice()
 	}
 
 	vkGetDeviceQueue(vkLogicalDevice, indices.graphicsFamily.value(), 0, &vkGraphicsQueue);
+	vkGetDeviceQueue(vkLogicalDevice, indices.presentFamily.value(), 0, &vkPresentQueue);
 }
 
 

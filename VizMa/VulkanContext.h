@@ -4,6 +4,8 @@
 
 #include <map>
 #include <optional>
+#include <set>
+#include <algorithm>
 
 
 #include "Window.h"
@@ -12,6 +14,7 @@
 struct QueueFamilyIndices
 {
 	std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
 
 	bool isComplete();
 };
@@ -49,7 +52,7 @@ private:
 	VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
 	VkDevice vkLogicalDevice = VK_NULL_HANDLE;
 	VkQueue vkGraphicsQueue = VK_NULL_HANDLE;
+	VkQueue vkPresentQueue = VK_NULL_HANDLE;
 
-	float graphicsQueuePriority = 1.0f;
 	const char* requiredDeviceExtensions[1] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };

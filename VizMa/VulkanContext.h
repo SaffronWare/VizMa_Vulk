@@ -20,7 +20,14 @@ struct QueueFamilyIndices
 	bool isComplete();
 };
 
+struct SwapchainSupportDetails
+{
+	VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
+	std::vector<VkSurfaceFormatKHR> vkSurfaceFormats;
+	std::vector<VkPresentModeKHR> vkPresentModes;
 
+	bool isSupported();
+};
 
 
 class VulkanContext
@@ -40,6 +47,7 @@ private:
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
 	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
+	SwapchainSupportDetails QuerySwapchainSupportDetails(const VkPhysicalDevice& device) const;
 	
 
 	VkApplicationInfo appInfo{};

@@ -7,6 +7,10 @@ bool QueueFamilyIndices::isComplete()
 	return graphicsFamily.has_value() && presentFamily.has_value();
 }
 
+bool SwapchainSupportDetails::isSupported()
+{
+	return !vkSurfaceFormats.empty() && !vkPresentModes.empty();
+}
 
 
 void VulkanContext::PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver)
@@ -75,11 +79,6 @@ bool VulkanContext::IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& d
 		extensionsToFind.erase(std::string(vkDeviceExtension.extensionName));
 	}
 
-	if (extensionsToFind.size() > 0)
-	{
-		LOG("EXTENSIONS MISSING!");
-	}
-
 	return extensionsToFind.size() == 0;
 }
 
@@ -91,9 +90,19 @@ bool VulkanContext::IsPhysicalDeviceValid(const VkPhysicalDevice& device) const 
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
+	
 
-	// for now first ignore properties/features
-	return IsCompletePhysicalDeviceExtensions(device) && findPhysicalDeviceQueueFamilies(device).isComplete();
+	if (!IsCompletePhysicalDeviceExtensions(device) || !findPhysicalDeviceQueueFamilies(device).isComplete())
+	{
+		return false;
+	}
+
+	if (!QuerySwapchainSupportDetails(device).isSupported())
+	{
+		return false;
+	}
+
+	return  true;
 }
 
 int VulkanContext::ScorePhysicalDevice(const VkPhysicalDevice& device) const
@@ -188,6 +197,25 @@ QueueFamilyIndices VulkanContext::findPhysicalDeviceQueueFamilies(const VkPhysic
 	}
 
 	return indices;
+}
+
+SwapchainSupportDetails VulkanContext::QuerySwapchainSupportDetails(const VkPhysicalDevice& device) const
+{
+	SwapchainSupportDetails vkSupportDetails;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, vkSurface, &vkSupportDetails.vkSurfaceCapabilities);
+
+	uint32_t surfaceFormatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, vkSurface, &surfaceFormatCount, nullptr);
+	vkSupportDetails.vkSurfaceFormats.resize(surfaceFormatCount);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, vkSurface, &surfaceFormatCount, vkSupportDetails.vkSurfaceFormats.data());
+
+	uint32_t presentModesCount;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, vkSurface, &presentModesCount, nullptr);
+	vkSupportDetails.vkPresentModes.resize(presentModesCount);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, vkSurface, &presentModesCount, vkSupportDetails.vkPresentModes.data());
+
+	return vkSupportDetails;
 }
 
 void VulkanContext::CreateLogicalDevice()

@@ -255,6 +255,19 @@ void VulkanContext::CreateLogicalDevice()
 	vkGetDeviceQueue(vkLogicalDevice, indices.presentFamily.value(), 0, &vkPresentQueue);
 }
 
+VkSurfaceFormatKHR VulkanContext::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const
+{
+	for (const VkSurfaceFormatKHR& format : availableFormats)
+	{
+		if ((format.format == VK_FORMAT_R8G8B8A8_SRGB) && (format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR))
+		{
+			return format;
+		}
+	}
+
+	return availableFormats[0];
+}
+
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver)
 {

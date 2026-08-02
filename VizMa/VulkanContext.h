@@ -48,6 +48,8 @@ private:
 
 	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
 	SwapchainSupportDetails QuerySwapchainSupportDetails(const VkPhysicalDevice& device) const;
+
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& avaibleFormats) const;
 	
 
 	VkApplicationInfo appInfo{};

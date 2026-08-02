@@ -16,9 +16,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	Window window = Window(hInstance, nCmdShow, wAPPLICATION_TITLE);
 	VulkanContext context(window, wAPPLICATION_TITLE, 1, 0, 0);
 	window.loop();
-
-	
-
 	return 0;
 }
 

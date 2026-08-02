@@ -7,10 +7,6 @@ bool QueueFamilyIndices::isComplete()
 	return graphicsFamily.has_value() && presentFamily.has_value();
 }
 
-bool PresentDeviceExtensions::isComplete()
-{
-	return khr_swapchain_extension;
-}
 
 
 void VulkanContext::PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver)
@@ -63,24 +59,28 @@ void VulkanContext::CreateWindowSurfaceWin32(const Window& window)
 	}
 }
 
-PresentDeviceExtensions VulkanContext::peekPhysicalDeviceExtensions(const VkPhysicalDevice& device) const
+bool VulkanContext::IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const
 {
-	PresentDeviceExtensions extensions_found;
+	
 
 	uint32_t extension_count;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
 	std::vector<VkExtensionProperties> vkDeviceExtensions(extension_count);
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, vkDeviceExtensions.data());
 
+	std::set<std::string> extensionsToFind(std::begin(vkRequiredDeviceExtensions), std::end(vkRequiredDeviceExtensions));
+
 	for (const auto& vkDeviceExtension : vkDeviceExtensions)
 	{
-		if (std::equal(std::begin(vkDeviceExtension.extensionName), std::end(vkDeviceExtension.extensionName), std::begin(VK_KHR_SWAPCHAIN_EXTENSION_NAME)))
-		{
-			extensions_found.khr_swapchain_extension = true;
-		}
+		extensionsToFind.erase(std::string(vkDeviceExtension.extensionName));
 	}
 
-	return extensions_found;
+	if (extensionsToFind.size() > 0)
+	{
+		LOG("EXTENSIONS MISSING!");
+	}
+
+	return extensionsToFind.size() == 0;
 }
 
 
@@ -93,7 +93,7 @@ bool VulkanContext::IsPhysicalDeviceValid(const VkPhysicalDevice& device) const 
 
 
 	// for now first ignore properties/features
-	return peekPhysicalDeviceExtensions(device).isComplete() && findPhysicalDeviceQueueFamilies(device).isComplete();
+	return IsCompletePhysicalDeviceExtensions(device) && findPhysicalDeviceQueueFamilies(device).isComplete();
 }
 
 int VulkanContext::ScorePhysicalDevice(const VkPhysicalDevice& device) const
@@ -216,8 +216,8 @@ void VulkanContext::CreateLogicalDevice()
 	vkDeviceCreationInfo.queueCreateInfoCount = static_cast<uint32_t>(vkUniqueQueueIndices.size());
 	vkDeviceCreationInfo.pQueueCreateInfos = vkQueueCreateInfos.data();
 	vkDeviceCreationInfo.pEnabledFeatures = &vkDeviceFeatures;
-	vkDeviceCreationInfo.enabledExtensionCount = 1;
-	vkDeviceCreationInfo.ppEnabledExtensionNames = requiredDeviceExtensions;
+	vkDeviceCreationInfo.enabledExtensionCount = static_cast<uint32_t>(vkRequiredDeviceExtensions.size());
+	vkDeviceCreationInfo.ppEnabledExtensionNames = vkRequiredDeviceExtensions.data();
 
 	if (vkCreateDevice(vkPhysicalDevice, &vkDeviceCreationInfo, nullptr, &vkLogicalDevice) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create logical device!");

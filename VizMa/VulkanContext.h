@@ -6,6 +6,7 @@
 #include <optional>
 #include <set>
 #include <algorithm>
+#include <string>
 
 
 #include "Window.h"
@@ -19,12 +20,7 @@ struct QueueFamilyIndices
 	bool isComplete();
 };
 
-struct PresentDeviceExtensions
-{
-	bool khr_swapchain_extension;
 
-	bool isComplete();
-};
 
 
 class VulkanContext
@@ -40,10 +36,11 @@ private:
 	void CreateLogicalDevice();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
+	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
 	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
-	PresentDeviceExtensions peekPhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
+	
 
 	VkApplicationInfo appInfo{};
 
@@ -54,5 +51,5 @@ private:
 	VkQueue vkGraphicsQueue = VK_NULL_HANDLE;
 	VkQueue vkPresentQueue = VK_NULL_HANDLE;
 
-	const char* requiredDeviceExtensions[1] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };

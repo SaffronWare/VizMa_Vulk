@@ -16,6 +16,14 @@ struct QueueFamilyIndices
 	bool isComplete();
 };
 
+struct PresentDeviceExtensions
+{
+	bool khr_swapchain_extension;
+
+	bool isComplete();
+};
+
+
 class VulkanContext
 {
 public:
@@ -31,7 +39,8 @@ private:
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
+	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
+	PresentDeviceExtensions peekPhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
 
 	VkApplicationInfo appInfo{};
 
@@ -39,5 +48,8 @@ private:
 	VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
 	VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
 	VkDevice vkLogicalDevice = VK_NULL_HANDLE;
-	
+	VkQueue vkGraphicsQueue = VK_NULL_HANDLE;
+
+	float graphicsQueuePriority = 1.0f;
+	const char* requiredDeviceExtensions[1] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };

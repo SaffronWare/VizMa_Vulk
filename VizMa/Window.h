@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <stdexcept>
 #include "DEBUG.h"
+#include <optional>
 
 constexpr const char* WINDOW_CLASS_NAME = "Window Class";
 
@@ -24,8 +25,7 @@ public:
 private:
 	static void RegisterWindowClass(HINSTANCE hinstance);
 
-	static WNDCLASS wndclass;
-	static bool class_registered;
+	static std::optional<WNDCLASS> wndclass;
 	
 	HINSTANCE hinstance = NULL;
 	HWND hwnd = NULL;

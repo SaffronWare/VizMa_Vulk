@@ -7,6 +7,11 @@ bool QueueFamilyIndices::isComplete()
 	return graphicsFamily.has_value();
 }
 
+bool PresentDeviceExtensions::isComplete()
+{
+	return khr_swapchain_extension;
+}
+
 
 void VulkanContext::PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver)
 {
@@ -30,7 +35,7 @@ void VulkanContext::CreateInstance()
 	vkInstanceCreateInfo.enabledLayerCount = 0; 
 
 	vkInstanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(2);
-	const char* InstanceExtensions[2] = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME }; 
+	const char* InstanceExtensions[3] = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME}; 
 	vkInstanceCreateInfo.ppEnabledExtensionNames = InstanceExtensions; 
 
 	VkResult vkInstanceResult = vkCreateInstance(&vkInstanceCreateInfo, nullptr, &vkInstance);
@@ -58,17 +63,37 @@ void VulkanContext::CreateWindowSurfaceWin32(const Window& window)
 	}
 }
 
+PresentDeviceExtensions VulkanContext::peekPhysicalDeviceExtensions(const VkPhysicalDevice& device) const
+{
+	PresentDeviceExtensions extensions_found;
+
+	uint32_t extension_count;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
+	std::vector<VkExtensionProperties> vkDeviceExtensions(extension_count);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, vkDeviceExtensions.data());
+
+	for (const auto& vkDeviceExtension : vkDeviceExtensions)
+	{
+		if (vkDeviceExtension.extensionName == VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+		{
+			extensions_found.khr_swapchain_extension = true;
+		}
+	}
+
+	return extensions_found;
+}
+
 
 bool VulkanContext::IsPhysicalDeviceValid(const VkPhysicalDevice& device) const {
 	VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures deviceFeatures;
+	
 	vkGetPhysicalDeviceProperties(device, &deviceProperties);
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
 
-
-	// for now first part always true
-	return true && findQueueFamilies(device).isComplete();
+	// for now first ignore properties/features
+	return peekPhysicalDeviceExtensions(device).isComplete() && findPhysicalDeviceQueueFamilies(device).isComplete();
 }
 
 int VulkanContext::ScorePhysicalDevice(const VkPhysicalDevice& device) const
@@ -130,7 +155,7 @@ void VulkanContext::GetPhysicalDevice()
 	}
 }
 
-QueueFamilyIndices VulkanContext::findQueueFamilies(VkPhysicalDevice device) const
+QueueFamilyIndices VulkanContext::findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const
 {
 	QueueFamilyIndices indices;
 
@@ -161,12 +186,30 @@ QueueFamilyIndices VulkanContext::findQueueFamilies(VkPhysicalDevice device) con
 
 void VulkanContext::CreateLogicalDevice()
 {
-	QueueFamilyIndices indices = findQueueFamilies(vkPhysicalDevice);
+	QueueFamilyIndices indices = findPhysicalDeviceQueueFamilies(vkPhysicalDevice);
 
-	VkDeviceQueueCreateInfo queueCreateInfo{};
-	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	queueCreateInfo.queueCount = 1;
+
+	VkDeviceQueueCreateInfo vkQueueCreateInfo{};
+	vkQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	vkQueueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	vkQueueCreateInfo.queueCount = 1;
+	vkQueueCreateInfo.pQueuePriorities = &graphicsQueuePriority;
+
+	VkPhysicalDeviceFeatures vkDeviceFeatures{};
+
+	VkDeviceCreateInfo vkDeviceCreationInfo{};
+	vkDeviceCreationInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	vkDeviceCreationInfo.queueCreateInfoCount = 1;
+	vkDeviceCreationInfo.pQueueCreateInfos = &vkQueueCreateInfo;
+	vkDeviceCreationInfo.pEnabledFeatures = &vkDeviceFeatures;
+	vkDeviceCreationInfo.enabledExtensionCount = 1;
+	vkDeviceCreationInfo.ppEnabledExtensionNames = requiredDeviceExtensions;
+
+	if (vkCreateDevice(vkPhysicalDevice, &vkDeviceCreationInfo, nullptr, &vkLogicalDevice) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create logical device!");
+	}
+
+	vkGetDeviceQueue(vkLogicalDevice, indices.graphicsFamily.value(), 0, &vkGraphicsQueue);
 }
 
 
@@ -181,7 +224,8 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 
 VulkanContext::~VulkanContext()
 {
-	// cleanup
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
+	vkDestroyDevice(vkLogicalDevice, nullptr);
+
 }

@@ -1,8 +1,6 @@
 #include "Window.h"
 
-bool Window::class_registered = false;
-WNDCLASS Window::wndclass = static_cast<WNDCLASS>(0);
-
+std::optional<WNDCLASS> Window::wndclass = std::nullopt;
 
 LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -25,13 +23,13 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 void Window::RegisterWindowClass(HINSTANCE hinstance)
 {
-	if (!class_registered)
+	if (!wndclass.has_value())
 	{
-		wndclass.hInstance = hinstance;
-		wndclass.lpfnWndProc = WindowProc;
-		wndclass.lpszClassName = WINDOW_CLASS_NAME;
-		RegisterClass(&wndclass);
-		class_registered = true;
+		wndclass.emplace();
+		wndclass.value().hInstance = hinstance;
+		wndclass.value().lpfnWndProc = WindowProc;
+		wndclass.value().lpszClassName = WINDOW_CLASS_NAME;
+		RegisterClass(&wndclass.value());
 	}
 }
 

@@ -1,8 +1,12 @@
 #include "DEBUG.h"
 
+#ifdef VIZMA_DEBUG
+DebugModeInitializer DebugInitializer;
+#endif
+
 void InitDebugConsole()
 {
-#ifdef DEBUG
+#ifdef VIZMA_DEBUG
 	AllocConsole();
 	FILE* _ = nullptr;
 	if (freopen("CONOUT$", "w", stdout) == NULL)

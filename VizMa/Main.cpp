@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "DEBUG.h"
+﻿#include "DEBUG.h"
 #include "Window.h"
 #include "VulkanContext.h"
 
@@ -15,7 +13,6 @@ const char* wAPPLICATION_TITLE = "VizMa";
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
 
-	InitDebugConsole();
 	Window window = Window(hInstance, nCmdShow, wAPPLICATION_TITLE);
 	VulkanContext context(window, wAPPLICATION_TITLE, 1, 0, 0);
 	window.loop();

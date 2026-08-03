@@ -17,25 +17,36 @@ GLSLangContext& GLSLangContext::Get()
 
 // credits to Andrew Huang for his amazing blog on this!: 
 // https://www.andrewhuang.llc/vulkan/integrating-glslang-for-runtime-shader-compilation/
-std::vector<uint32_t> GLSLangContext::compileShader(const std::string& source, EShLanguage stage) const
+std::vector<uint32_t> GLSLangContext::compileShader(const GLSLShaderCompileInfo& compileInfo) const
 {
-	glslang::TShader shader(stage);
+	glslang::TShader shader(compileInfo.stage);
 	
-	const char* source_c_str = source.c_str();
+	const char* source_c_str = compileInfo.source.c_str();
 	shader.setStrings(&source_c_str, 1);
 
-	shader.setEnvInput(glslang::EShSourceGlsl, EShLangVertex, glslang::EShClientVulkan, 100);
-	shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
-	shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
+	shader.setEnvInput(compileInfo.language, compileInfo.stage, compileInfo.dialect, compileInfo.dialect_version);
+	shader.setEnvClient(compileInfo.dialect, compileInfo.vkVersion);
+	shader.setEnvTarget(glslang::EshTargetSpv, compileInfo.shaderSpvVer);
 
 	shader.parse(
 		GetDefaultResources(),  // default TBuiltInResource from ResourceLimits.h
-		100,                    // default version
+		compileInfo.dialect_version,// set to 100 by GlslShaderCompileInfo (default)
 		false,                  // not forward compatible
 		EShMsgDefault           // report default error/warning messages
 	);
 
+	LOG("Parsing shader: " << shader.getInfoLog());
 
-	return std::vector<uint32_t>();
+	glslang::TProgram program;
+	program.addShader(&shader);
+	program.link(EShMsgDefault);    
 
+	LOG("Linking program: " << program.getInfoLog()); 
+
+	glslang::TIntermediate* intermediate = program.getIntermediate(compileInfo.stage);
+
+	std::vector<uint32_t> SPIRV_OUTPUT;
+	glslang::GlslangToSpv(*intermediate, SPIRV_OUTPUT);
+	
+	return SPIRV_OUTPUT;
 }

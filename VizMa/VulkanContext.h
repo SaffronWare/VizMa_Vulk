@@ -70,4 +70,10 @@ private:
 	VkSwapchainKHR vkSwapchain;
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
+
+	std::vector<VkImage> vkSwapchainImages;
+	VkSurfaceFormatKHR vkSurfaceFormat;
+	VkExtent2D vkSurfaceExtent;
+	VkPresentModeKHR vkSurfacePresentMode;
 };

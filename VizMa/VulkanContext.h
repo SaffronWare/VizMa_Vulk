@@ -44,6 +44,7 @@ private:
 	void GetPhysicalDevice();
 	void CreateLogicalDevice();
 	void CreateSwapchain();
+	void CreateImageViews();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
@@ -73,6 +74,8 @@ private:
 
 
 	std::vector<VkImage> vkSwapchainImages;
+	std::vector<VkImageView> vkSwapchainImageViews;
+
 	VkSurfaceFormatKHR vkSurfaceFormat;
 	VkExtent2D vkSurfaceExtent;
 	VkPresentModeKHR vkSurfacePresentMode;

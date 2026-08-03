@@ -97,7 +97,7 @@ bool VulkanContext::IsPhysicalDeviceValid(const VkPhysicalDevice& device) const 
 		return false;
 	}
 
-	if (!QuerySwapchainSupportDetails(device).isSupported())
+	if (!querySwapchainSupportDetails(device).isSupported())
 	{
 		return false;
 	}

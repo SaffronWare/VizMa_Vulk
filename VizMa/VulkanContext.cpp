@@ -46,14 +46,14 @@ void VulkanContext::CreateInstance()
 }
 
 
-void VulkanContext::CreateWindowSurfaceWin32(const Window& window)
+void VulkanContext::CreateWindowSurfaceWin32()
 {
 
 	VkWin32SurfaceCreateInfoKHR  vkSurfaceCreateInfo = {};
 	vkSurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	vkSurfaceCreateInfo.hwnd = window.getWindowHandle();
+	vkSurfaceCreateInfo.hwnd = vkWin32Window.getWindowHandle();
 
-	vkSurfaceCreateInfo.hinstance = window.getWindowInstance();
+	vkSurfaceCreateInfo.hinstance = vkWin32Window.getWindowInstance();
 
 
 	VkResult vkSurfaceCreationResult = vkCreateWin32SurfaceKHR(vkInstance, &vkSurfaceCreateInfo, nullptr, &vkSurface);
@@ -199,7 +199,7 @@ QueueFamilyIndices VulkanContext::findPhysicalDeviceQueueFamilies(const VkPhysic
 	return indices;
 }
 
-SwapchainSupportDetails VulkanContext::QuerySwapchainSupportDetails(const VkPhysicalDevice& device) const
+SwapchainSupportDetails VulkanContext::querySwapchainSupportDetails(const VkPhysicalDevice& device) const
 {
 	SwapchainSupportDetails vkSupportDetails;
 
@@ -309,14 +309,44 @@ VkExtent2D VulkanContext::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfa
 
 }
 
+void VulkanContext::CreateSwapchain()
+{
+	SwapchainSupportDetails vkSwapchainDetails = querySwapchainSupportDetails(vkPhysicalDevice);
+
+	VkSurfaceFormatKHR vkSurfaceFormat = chooseSwapSurfaceFormat(vkSwapchainDetails.vkSurfaceFormats);
+	VkPresentModeKHR vkSurfacePresentMode = chooseSwapPresentMode(vkSwapchainDetails.vkPresentModes);
+	VkExtent2D vkSurfaceExtent = chooseSwapExtent(vkSwapchainDetails.vkSurfaceCapabilities);
+
+	uint32_t imageCount = vkSwapchainDetails.vkSurfaceCapabilities.minImageCount + 1;
+
+	// if 0 no max
+	if (vkSwapchainDetails.vkSurfaceCapabilities.maxImageCount > 0 && imageCount > vkSwapchainDetails.vkSurfaceCapabilities.maxImageCount)
+	{
+		imageCount = vkSwapchainDetails.vkSurfaceCapabilities.maxImageCount;
+	}
+
+	VkSwapchainCreateInfoKHR vkSwapchainCreationInfo{};
+	vkSwapchainCreationInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	vkSwapchainCreationInfo.surface = vkSurface;
+	vkSwapchainCreationInfo.minImageCount = imageCount;
+	vkSwapchainCreationInfo.imageFormat = vkSurfaceFormat.format;
+	vkSwapchainCreationInfo.imageColorSpace = vkSurfaceFormat.colorSpace;
+	vkSwapchainCreationInfo.presentMode = vkSurfacePresentMode;
+	vkSwapchainCreationInfo.imageExtent = vkSurfaceExtent;
+	vkSwapchainCreationInfo.imageArrayLayers = 1;
+	vkSwapchainCreationInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+}
+
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
 	PopulateAppInfo(title, version_major, version_minor, sub_ver);
 	CreateInstance();
-	CreateWindowSurfaceWin32(window);
+	CreateWindowSurfaceWin32();
 	GetPhysicalDevice();
 	CreateLogicalDevice();
+	CreateSwapchain();
 }
 
 VulkanContext::~VulkanContext()

@@ -25,8 +25,8 @@ struct QueueFamilyIndices
 struct SwapchainSupportDetails
 {
 	VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
-	std::vector<VkSurfaceFormatKHR> vkSurfaceFormats;
-	std::vector<VkPresentModeKHR> vkPresentModes;
+	std::vector<VkSurfaceFormatKHR> vkSurfaceFormats = {};
+	std::vector<VkPresentModeKHR> vkPresentModes = {};
 
 	bool isSupported();
 };
@@ -40,9 +40,10 @@ public:
 private:
 	void PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver);
 	void CreateInstance();
-	void CreateWindowSurfaceWin32(const Window& window);
+	void CreateWindowSurfaceWin32();
 	void GetPhysicalDevice();
 	void CreateLogicalDevice();
+	void CreateSwapchain();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
@@ -51,7 +52,7 @@ private:
 	const Window& vkWin32Window;
 
 	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
-	SwapchainSupportDetails QuerySwapchainSupportDetails(const VkPhysicalDevice& device) const;
+	SwapchainSupportDetails querySwapchainSupportDetails(const VkPhysicalDevice& device) const;
 
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;

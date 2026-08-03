@@ -422,9 +422,11 @@ VulkanContext::~VulkanContext()
 		vkDestroyImageView(vkLogicalDevice,imageView, nullptr);
 	}
 
+
 	vkDestroySwapchainKHR(vkLogicalDevice, vkSwapchain, nullptr);
+	vkDestroyDevice(vkLogicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
-	vkDestroyDevice(vkLogicalDevice, nullptr);
+	
 
 }

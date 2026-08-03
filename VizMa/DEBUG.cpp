@@ -9,15 +9,15 @@ void InitDebugConsole()
 #ifdef VIZMA_DEBUG
 	AllocConsole();
 	FILE* _ = nullptr;
-	if (freopen("CONOUT$", "w", stdout) == NULL)
+	if (freopen_s(&_, "CONOUT$", "w", stdout) != 0)
 	{
 		throw std::runtime_error("FAILED TO SET STDOUT STREAM\n");
 	}
-	if (freopen("CONIN$", "r", stdin) == NULL)
+	if (freopen_s(&_, "CONIN$", "r", stdin) != 0)
 	{
 		throw std::runtime_error("FAILED TO SET STDIN STREAM\n");
 	}
-	if (freopen("CONOUT$", "w", stderr) == NULL)
+	if (freopen_s(&_, "CONOUT$", "w", stderr) != 0)
 	{
 		throw std::runtime_error("FAILED TO SET STDCERR STREAM\n");
 	}

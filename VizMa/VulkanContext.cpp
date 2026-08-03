@@ -402,11 +402,44 @@ void VulkanContext::CreateGraphicsPipeline()
 	GLSLShaderCompileInfo info;
 	info.source = FileUtils::readFile("C:\\Users\\aryan\\source\\repos\\VizMa_Vulk\\VizMa\\Shaders\\versdt.glsl");
 	info.stage = EShLangVertex;
+	std::vector<uint32_t> vertexSPIRV = glslLangContext.compileShader(info);
 
-	LOG(info.source);
+	info.source = FileUtils::readFile("C:\\Users\\aryan\\source\\repos\\VizMa_Vulk\\VizMa\\Shaders\\frag.glsl");
+	info.stage = EShLangFragment;
+	std::vector<uint32_t> fragmentSPIRV = glslLangContext.compileShader(info);
 
-	std::vector<uint32_t> vertexsSPIRV = glslLangContext.compileShader(info);
+	VkShaderModule vkVertexShaderModule = createShaderModule(vertexSPIRV);
+	VkShaderModule vkFragmentShaderModule = createShaderModule(fragmentSPIRV);
 
+	VkPipelineShaderStageCreateInfo vertInfo;
+	vertInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	vertInfo.module = vkVertexShaderModule;
+	vertInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo fragInfo;
+	vertInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	vertInfo.module = vkFragmentShaderModule;
+	fragInfo.pName = "main";
+
+
+}
+
+VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code)
+{
+	VkShaderModuleCreateInfo vkCreateInfo{};
+	vkCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	vkCreateInfo.codeSize = code.size();
+	vkCreateInfo.pCode = code.data();
+	
+	VkShaderModule vkShaderModule;
+	if (vkCreateShaderModule(vkLogicalDevice, &vkCreateInfo, nullptr, &vkShaderModule) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to compile shader with SPIRV source");
+	}
+
+	return vkShaderModule;
 }
 
 
@@ -422,6 +455,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateImageViews();
 	CreateGraphicsPipeline();
 }
+
 
 VulkanContext::~VulkanContext()
 {

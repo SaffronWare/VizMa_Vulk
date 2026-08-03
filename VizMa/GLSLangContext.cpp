@@ -19,6 +19,7 @@ GLSLangContext& GLSLangContext::Get()
 // https://www.andrewhuang.llc/vulkan/integrating-glslang-for-runtime-shader-compilation/
 std::vector<uint32_t> GLSLangContext::compileShader(const GLSLShaderCompileInfo& compileInfo) const
 {
+	LOG("compiling shader of type" << compileInfo.stage << " with source:\n" << compileInfo.source);
 	glslang::TShader shader(compileInfo.stage);
 	
 	const char* source_c_str = compileInfo.source.c_str();

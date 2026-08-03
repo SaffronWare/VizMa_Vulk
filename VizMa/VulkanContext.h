@@ -66,6 +66,7 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) const;
 	
+	VkShaderModule createShaderModule(const std::vector<uint32_t>& code);
 
 	VkApplicationInfo appInfo{};
 

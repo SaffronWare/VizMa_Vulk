@@ -14,7 +14,7 @@ struct DebugModeInitializer
 {
 	DebugModeInitializer()
 	{
-		std::cout << "inittt";
+		
 		InitDebugConsole();
 	}
 };

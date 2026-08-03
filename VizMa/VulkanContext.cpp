@@ -399,12 +399,20 @@ void VulkanContext::CreateImageViews()
 
 void VulkanContext::CreateGraphicsPipeline()
 {
+	GLSLShaderCompileInfo info;
+	info.source = FileUtils::readFile("C:\\Users\\aryan\\source\\repos\\VizMa_Vulk\\VizMa\\Shaders\\versdt.glsl");
+	info.stage = EShLangVertex;
+
+	LOG(info.source);
+
+	std::vector<uint32_t> vertexsSPIRV = glslLangContext.compileShader(info);
 
 }
 
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
+
 	PopulateAppInfo(title, version_major, version_minor, sub_ver);
 	CreateInstance();
 	CreateWindowSurfaceWin32();

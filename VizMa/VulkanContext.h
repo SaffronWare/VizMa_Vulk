@@ -12,6 +12,8 @@
 
 
 #include "Window.h"
+#include "FileUtils.h"
+#include "GLSLangContext.h"
 #include "DEBUG.h"
 
 struct QueueFamilyIndices
@@ -35,8 +37,12 @@ struct SwapchainSupportDetails
 class VulkanContext
 {
 public:
+	inline static GLSLangContext& glslLangContext = GLSLangContext::Get();
+
 	VulkanContext(const Window& window, const char* title = "My Application", int version_major = 1, int version_minor = 0, int sub_ver = 0);
 	~VulkanContext();
+
+
 private:
 	void PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver);
 	void CreateInstance();

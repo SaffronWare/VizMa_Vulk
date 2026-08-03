@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable (VizMa WIN32 "Main.cpp" 
 "VulkanContext.cpp" 
 "Window.cpp"
-"DEBUG.cpp" "DEBUG.h" "Window.h" "VulkanContext.h" "Shader.h" "Shader.cpp" "GLSLangContext.h" "GLSLangContext.cpp" "FileUtils.h" "FileUtils.cpp")
+"DEBUG.cpp" "DEBUG.h" "Window.h" "VulkanContext.h"   "GLSLangContext.h" "GLSLangContext.cpp" "FileUtils.h" "FileUtils.cpp")
 
 # set to VIZMA_DEBUG for DEBUG & VIZMA_RELEASE for RELEASE (this does nothing for now lol)
 target_compile_definitions(VizMa PRIVATE VIZMA_DEBUG)

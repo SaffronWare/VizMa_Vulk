@@ -40,9 +40,11 @@ public:
 	GLSLangContext(GLSLangContext&&) = delete;
 	GLSLangContext& operator=(GLSLangContext&&) = delete;
 
+	std::vector<uint32_t> compileShader(const GLSLShaderCompileInfo& compileInfo) const;
+
 private:
 	GLSLangContext();
 	~GLSLangContext();
 
-	std::vector<uint32_t> compileShader(const GLSLShaderCompileInfo& compileInfo) const;
+	
 };

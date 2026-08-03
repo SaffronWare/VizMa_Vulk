@@ -6,8 +6,8 @@ std::string FileUtils::readFile(const std::filesystem::path& path)
 
 	if (!file)
 	{
-		LOG("failed to open file at " << path);
-		throw std::runtime_error("Failed to open file");
+		CERR("failed to open file at " << path);
+		throw std::runtime_error("Failed to open file:" + path.string());
 	}
 
 	std::ostringstream stream;

@@ -12,11 +12,23 @@ const char* wAPPLICATION_TITLE = "VizMa";
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+	try {
+		Window window = Window(hInstance, nCmdShow, wAPPLICATION_TITLE);
+		VulkanContext context(window, wAPPLICATION_TITLE, 1, 0, 0);
+		window.loop();
+		return 0;
+	}
+	catch (std::exception& e)
+	{
 
-	Window window = Window(hInstance, nCmdShow, wAPPLICATION_TITLE);
-	VulkanContext context(window, wAPPLICATION_TITLE, 1, 0, 0);
-	window.loop();
-	return 0;
+		MessageBoxA(
+			nullptr,
+			e.what(),
+			"VizMa Error",
+			MB_OK | MB_ICONERROR
+		);
+		return -1;
+	}
 }
 
 

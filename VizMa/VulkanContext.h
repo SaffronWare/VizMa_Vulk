@@ -45,6 +45,7 @@ private:
 	void CreateLogicalDevice();
 	void CreateSwapchain();
 	void CreateImageViews();
+	void CreateGraphicsPipeline();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;

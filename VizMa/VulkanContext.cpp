@@ -397,6 +397,11 @@ void VulkanContext::CreateImageViews()
 	}
 }
 
+void VulkanContext::CreateGraphicsPipeline()
+{
+
+}
+
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
@@ -407,6 +412,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateLogicalDevice();
 	CreateSwapchain();
 	CreateImageViews();
+	CreateGraphicsPipeline();
 }
 
 VulkanContext::~VulkanContext()

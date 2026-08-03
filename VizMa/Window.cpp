@@ -15,6 +15,7 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	case WM_SIZE:
 		width = LOWORD(lParam);
 		height = HIWORD(lParam);
+
 		//OnSize(hwnd, (UINT)wParam, width, height);
 		break;
 	}
@@ -83,6 +84,20 @@ int Window::loop()
 		}
 
 	}
+}
+
+int Window::getClientSurfaceWidth() const
+{
+	RECT SurfaceRect;
+	GetClientRect(hwnd, &SurfaceRect);
+	return SurfaceRect.right - SurfaceRect.left;
+}
+
+int Window::getClientSurfaceHeight() const
+{
+	RECT SurfaceRect;
+	GetClientRect(hwnd, &SurfaceRect);
+	return SurfaceRect.bottom - SurfaceRect.top;
 }
 
 HWND Window::getWindowHandle() const

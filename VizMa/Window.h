@@ -19,8 +19,14 @@ public:
 
 	int loop();
 
+	//bool updateClientSurfaceRect();
+	int getClientSurfaceWidth() const;
+	int getClientSurfaceHeight() const;
+
 	HWND getWindowHandle() const;
 	HINSTANCE getWindowInstance() const;
+
+	
 
 private:
 	static void RegisterWindowClass(HINSTANCE hinstance);

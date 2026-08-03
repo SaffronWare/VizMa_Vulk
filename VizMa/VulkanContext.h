@@ -7,6 +7,8 @@
 #include <set>
 #include <algorithm>
 #include <string>
+#include <cstdint>
+#include <limits>
 
 
 #include "Window.h"
@@ -46,10 +48,14 @@ private:
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
+	const Window& vkWin32Window;
+
 	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
 	SwapchainSupportDetails QuerySwapchainSupportDetails(const VkPhysicalDevice& device) const;
 
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& avaibleFormats) const;
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
+	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) const;
 	
 
 	VkApplicationInfo appInfo{};

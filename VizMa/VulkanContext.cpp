@@ -268,8 +268,49 @@ VkSurfaceFormatKHR VulkanContext::chooseSwapSurfaceFormat(const std::vector<VkSu
 	return availableFormats[0];
 }
 
+VkPresentModeKHR VulkanContext::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const {
+	for (const auto& availablePresentMode : availablePresentModes) {
+		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+			return availablePresentMode;
+		}
+	}
 
-VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver)
+	return VK_PRESENT_MODE_FIFO_KHR; // guaranteed hehe! :D
+}
+
+VkExtent2D VulkanContext::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) const
+{
+	if (surfaceCapabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
+	{
+		return surfaceCapabilities.currentExtent;
+	}
+	else
+	{
+		int width, height;
+
+		width = vkWin32Window.getClientSurfaceWidth();
+		height = vkWin32Window.getClientSurfaceHeight();
+
+		VkExtent2D actualExtent = {
+			static_cast<uint32_t>(width),
+			static_cast<uint32_t>(height)
+		};
+
+		actualExtent.width = std::clamp(actualExtent.width, 
+			surfaceCapabilities.minImageExtent.width, 
+			surfaceCapabilities.maxImageExtent.width);
+
+		actualExtent.height = std::clamp(actualExtent.height,
+			surfaceCapabilities.minImageExtent.height,
+			surfaceCapabilities.maxImageExtent.height);
+
+		return actualExtent;
+	}
+
+}
+
+
+VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
 	PopulateAppInfo(title, version_major, version_minor, sub_ver);
 	CreateInstance();

@@ -418,10 +418,13 @@ void VulkanContext::CreateGraphicsPipeline()
 	vertInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo fragInfo;
-	vertInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	vertInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	vertInfo.module = vkFragmentShaderModule;
+	fragInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragInfo.module = vkFragmentShaderModule;
 	fragInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo shaderStagesInfo[] = { vertInfo, fragInfo };
+
 
 
 }
@@ -430,7 +433,7 @@ VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& co
 {
 	VkShaderModuleCreateInfo vkCreateInfo{};
 	vkCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	vkCreateInfo.codeSize = code.size();
+	vkCreateInfo.codeSize = code.size() * static_cast<size_t>(sizeof(uint32_t));
 	vkCreateInfo.pCode = code.data();
 	
 	VkShaderModule vkShaderModule;

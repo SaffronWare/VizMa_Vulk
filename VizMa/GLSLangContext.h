@@ -1,6 +1,10 @@
 #pragma once
 
 #include <ShaderLang.h>
+#include <ResourceLimits.h>
+
+#include <vector>
+#include <string>
 
 #include "DEBUG.h"
 
@@ -18,4 +22,6 @@ public:
 private:
 	GLSLangContext();
 	~GLSLangContext();
+
+	std::vector<uint32_t> compileShader(const std::string& source, EShLanguage stage) const;
 };

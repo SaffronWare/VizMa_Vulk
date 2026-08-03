@@ -45,8 +45,8 @@ std::vector<uint32_t> GLSLangContext::compileShader(const GLSLShaderCompileInfo&
 
 	glslang::TIntermediate* intermediate = program.getIntermediate(compileInfo.stage);
 
-	std::vector<uint32_t> SPIRV_OUTPUT;
-	glslang::GlslangToSpv(*intermediate, SPIRV_OUTPUT);
+	std::vector<uint32_t> spirvOut;
+	glslang::GlslangToSpv(*intermediate, spirvOut);
 	
-	return SPIRV_OUTPUT;
+	return spirvOut;
 }

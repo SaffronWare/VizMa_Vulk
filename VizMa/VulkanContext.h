@@ -67,6 +67,7 @@ private:
 	VkDevice vkLogicalDevice = VK_NULL_HANDLE;
 	VkQueue vkGraphicsQueue = VK_NULL_HANDLE;
 	VkQueue vkPresentQueue = VK_NULL_HANDLE;
+	VkSwapchainKHR vkSwapchain;
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };

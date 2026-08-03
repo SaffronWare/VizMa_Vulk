@@ -336,6 +336,33 @@ void VulkanContext::CreateSwapchain()
 	vkSwapchainCreationInfo.imageArrayLayers = 1;
 	vkSwapchainCreationInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
+	QueueFamilyIndices vkQueueIndices = findPhysicalDeviceQueueFamilies(vkPhysicalDevice);
+	uint32_t vkQueueIndicesArray[2] = { vkQueueIndices.graphicsFamily.value(), vkQueueIndices.presentFamily.value() };
+
+	if (vkQueueIndices.graphicsFamily != vkQueueIndices.presentFamily)
+	{
+		vkSwapchainCreationInfo.queueFamilyIndexCount = 2;
+		vkSwapchainCreationInfo.pQueueFamilyIndices = vkQueueIndicesArray;
+		vkSwapchainCreationInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+	}
+	else
+	{
+		// ignore for now
+		vkSwapchainCreationInfo.queueFamilyIndexCount = 0;
+		vkSwapchainCreationInfo.pQueueFamilyIndices = nullptr;
+		vkSwapchainCreationInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	}
+
+	vkSwapchainCreationInfo.preTransform = vkSwapchainDetails.vkSurfaceCapabilities.currentTransform;
+	vkSwapchainCreationInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	vkSwapchainCreationInfo.presentMode = vkSurfacePresentMode;
+	vkSwapchainCreationInfo.clipped = VK_TRUE;	
+	vkSwapchainCreationInfo.oldSwapchain = nullptr;
+
+	if (vkCreateSwapchainKHR(vkLogicalDevice, &vkSwapchainCreationInfo, nullptr, &vkSwapchain) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create swap chain!");
+	}
+
 }
 
 
@@ -351,6 +378,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 
 VulkanContext::~VulkanContext()
 {
+	vkDestroySwapchainKHR(vkLogicalDevice, vkSwapchain, nullptr);
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
 	vkDestroyDevice(vkLogicalDevice, nullptr);

@@ -12,6 +12,36 @@ bool SwapchainSupportDetails::isSupported()
 	return !vkSurfaceFormats.empty() && !vkPresentModes.empty();
 }
 
+void VulkanContext::drawFrame()
+{
+	vkWaitForFences(vkLogicalDevice, 1, &vkInFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(vkLogicalDevice, 1, &vkInFlightFence);
+
+	uint32_t vkSwapchainImageIndex;
+	vkAcquireNextImageKHR(vkLogicalDevice, vkSwapchain, UINT64_MAX, vkImageReadySemaphore, VK_NULL_HANDLE, &vkSwapchainImageIndex);
+
+	vkResetCommandBuffer(vkCommandBuffer, 0);
+
+	recordCommandBuffer(vkCommandBuffer, vkSwapchainImageIndex);
+
+	VkSubmitInfo vkCmdBufferSubInfo{};
+	vkCmdBufferSubInfo.commandBufferCount = 1;
+	vkCmdBufferSubInfo.pCommandBuffers = &vkCommandBuffer;
+	vkCmdBufferSubInfo.waitSemaphoreCount = 1;
+	vkCmdBufferSubInfo.pWaitSemaphores = &vkImageReadySemaphore;
+	// want to wait before coloring
+	VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	vkCmdBufferSubInfo.pWaitDstStageMask = &waitStage;
+	vkCmdBufferSubInfo.signalSemaphoreCount = 1;
+	vkCmdBufferSubInfo.pSignalSemaphores = &vkRenderFinishedSemaphore;
+
+	if (vkQueueSubmit(vkGraphicsQueue, 1, &vkCmdBufferSubInfo, vkInFlightFence) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to submit to graphics queue");
+	}
+
+}
+
 
 void VulkanContext::PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver)
 {
@@ -666,6 +696,7 @@ void VulkanContext::CreateSyncObjects()
 
 	VkFenceCreateInfo vkFenceInfo{};
 	vkFenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	vkFenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;	
 
 	if (vkCreateSemaphore(vkLogicalDevice, &vkSemaphoreInfo, nullptr, &vkImageReadySemaphore) != VK_SUCCESS ||
 		vkCreateSemaphore(vkLogicalDevice, &vkSemaphoreInfo, nullptr, &vkRenderFinishedSemaphore) != VK_SUCCESS ||
@@ -708,6 +739,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateFrameBuffers();
 	CreateCommandPool();
 	CreateCommandBuffer();
+	CreateSyncObjects();
 }
 
 

@@ -20,7 +20,7 @@ public:
 	Window(HINSTANCE hInstance, int nCmdShow, const char* app_title);
 	~Window();
 
-	int loop(VulkanContext& context);
+	bool loop();
 
 	//bool updateClientSurfaceRect();
 	int getClientSurfaceWidth() const;

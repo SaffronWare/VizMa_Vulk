@@ -42,6 +42,7 @@ public:
 	VulkanContext(const Window& window, const char* title = "My Application", int version_major = 1, int version_minor = 0, int sub_ver = 0);
 	~VulkanContext();
 
+	void drawFrame();
 
 private:
 	void PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver);

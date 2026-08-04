@@ -66,24 +66,24 @@ Window::~Window()
 
 }
 
-int Window::loop(VulkanContext& context)
+bool Window::loop()
 {
 	MSG msg;
 
-	while (true)
+
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 	{
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		TranslateMessage(&msg);
+		DispatchMessageW(&msg);
+
+		if (msg.message == WM_QUIT)
 		{
-			TranslateMessage(&msg);
-			DispatchMessageW(&msg);
-
-			if (msg.message == WM_QUIT)
-			{
-				return 0;
-			}
+			return true;
 		}
-
 	}
+
+	return false;
+	
 }
 
 int Window::getClientSurfaceWidth() const

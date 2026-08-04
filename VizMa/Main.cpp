@@ -15,7 +15,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	try {
 		Window window = Window(hInstance, nCmdShow, wAPPLICATION_TITLE);
 		VulkanContext context(window, wAPPLICATION_TITLE, 1, 0, 0);
-		window.loop();
+
+		while (window.loop())
+		{
+			context.drawFrame();
+		}
+
 		return 0;
 	}
 	catch (std::exception& e)

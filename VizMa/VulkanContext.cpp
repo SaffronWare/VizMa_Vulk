@@ -713,6 +713,10 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 
 VulkanContext::~VulkanContext()
 {
+	vkDestroySemaphore(vkLogicalDevice, vkImageReadySemaphore, nullptr);
+	vkDestroySemaphore(vkLogicalDevice, vkRenderFinishedSemaphore, nullptr);
+	vkDestroyFence(vkLogicalDevice, vkInFlightFence, nullptr);
+
 	vkDestroyCommandPool(vkLogicalDevice, vkCommandPool, nullptr);
 
 	for (VkFramebuffer& vkFrameBuffer : vkSwapchainFrameBuffers)

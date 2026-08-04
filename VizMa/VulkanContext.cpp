@@ -500,7 +500,25 @@ void VulkanContext::CreateGraphicsPipeline()
 		throw std::runtime_error("Failed to create pipeline layout\n");
 	}
 
+	VkGraphicsPipelineCreateInfo vkPipelineInfo{};
+	vkPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	vkPipelineInfo.stageCount = 2;
+	vkPipelineInfo.pStages = shaderStagesInfo;
+	vkPipelineInfo.pVertexInputState = &vkVertexInputInfo;
+	vkPipelineInfo.pInputAssemblyState = &vkInputAssembly;
+	vkPipelineInfo.pViewportState = &vkViewportState;
+	vkPipelineInfo.pRasterizationState = &vkRasterizer;
+	vkPipelineInfo.pMultisampleState = &multisampling;
+	vkPipelineInfo.pColorBlendState = &vkColorBlending;
+	vkPipelineInfo.pDynamicState = &vkDynamicState;
+	vkPipelineInfo.layout = vkPipelineLayout;
+	vkPipelineInfo.renderPass = vkRenderPass;
+	vkPipelineInfo.subpass = 0;
 
+	if (vkCreateGraphicsPipelines(vkLogicalDevice, nullptr, 1, &vkPipelineInfo, nullptr, &vkGraphicsPipeline) != VK_SUCCESS)
+	{
+		throw std::runtime_error("pipeline creation failed\n");
+	}
 	
 }
 
@@ -574,6 +592,8 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 
 VulkanContext::~VulkanContext()
 {
+	vkDestroyPipeline(vkLogicalDevice, vkGraphicsPipeline, nullptr);
+	vkDestroyRenderPass(vkLogicalDevice, vkRenderPass, nullptr);
 	vkDestroyPipelineLayout(vkLogicalDevice, vkPipelineLayout, nullptr);
 
 	for (VkImageView& imageView : vkSwapchainImageViews)

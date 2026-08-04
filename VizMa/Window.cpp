@@ -66,7 +66,7 @@ Window::~Window()
 
 }
 
-int Window::loop()
+int Window::loop(VulkanContext& context)
 {
 	MSG msg;
 

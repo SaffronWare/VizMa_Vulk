@@ -4,6 +4,8 @@
 #include "DEBUG.h"
 #include <optional>
 
+#include "VulkanContext.h"
+
 constexpr const char* WINDOW_CLASS_NAME = "Window Class";
 
 
@@ -13,11 +15,13 @@ private:
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+	VulkanContext& context;
+
 public:
 	Window(HINSTANCE hInstance, int nCmdShow, const char* app_title);
 	~Window();
 
-	int loop();
+	int loop(VulkanContext& context);
 
 	//bool updateClientSurfaceRect();
 	int getClientSurfaceWidth() const;

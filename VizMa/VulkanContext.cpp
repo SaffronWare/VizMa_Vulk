@@ -600,6 +600,22 @@ void VulkanContext::CreateCommandPool()
 
 }
 
+void VulkanContext::CreateCommandBuffer()
+{
+	VkCommandBufferAllocateInfo vkCmdBufferInfo{};
+	vkCmdBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	vkCmdBufferInfo.commandBufferCount = 1;
+	vkCmdBufferInfo.commandPool = vkCommandPool;
+	vkCmdBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+
+	if (vkAllocateCommandBuffers(vkLogicalDevice, &vkCmdBufferInfo, &vkCommandBuffer) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create command buffer!");
+	}
+	
+
+}
+
 
 VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code)
 {
@@ -632,6 +648,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateGraphicsPipeline();
 	CreateFrameBuffers();
 	CreateCommandPool();
+	CreateCommandBuffer();
 }
 
 

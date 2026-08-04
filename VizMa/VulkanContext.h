@@ -55,6 +55,7 @@ private:
 	void CreateGraphicsPipeline();
 	void CreateFrameBuffers();
 	void CreateCommandPool();
+	void CreateCommandBuffer();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
@@ -84,6 +85,7 @@ private:
 	VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 	VkPipeline vkGraphicsPipeline = VK_NULL_HANDLE;
 	VkCommandPool vkCommandPool = VK_NULL_HANDLE;
+	VkCommandBuffer vkCommandbuffer = VK_NULL_HANDLE;
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 

@@ -659,6 +659,22 @@ void VulkanContext::recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIn
 
 }
 
+void VulkanContext::CreateSyncObjects()
+{
+	VkSemaphoreCreateInfo vkSemaphoreInfo{};
+	vkSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo vkFenceInfo{};
+	vkFenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+	if (vkCreateSemaphore(vkLogicalDevice, &vkSemaphoreInfo, nullptr, &vkImageReadySemaphore) != VK_SUCCESS ||
+		vkCreateSemaphore(vkLogicalDevice, &vkSemaphoreInfo, nullptr, &vkRenderFinishedSemaphore) != VK_SUCCESS ||
+		vkCreateFence(vkLogicalDevice, &vkFenceInfo, nullptr, &vkInFlightFence) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create semaphores or fences!");
+	}
+
+}
 
 VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code) const
 {

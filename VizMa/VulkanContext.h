@@ -56,6 +56,7 @@ private:
 	void CreateFrameBuffers();
 	void CreateCommandPool();
 	void CreateCommandBuffer();
+	void CreateSyncObjects();
 
 	void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex) const;
 
@@ -88,6 +89,10 @@ private:
 	VkPipeline vkGraphicsPipeline = VK_NULL_HANDLE;
 	VkCommandPool vkCommandPool = VK_NULL_HANDLE;
 	VkCommandBuffer vkCommandBuffer = VK_NULL_HANDLE;
+	VkSemaphore vkImageReadySemaphore = VK_NULL_HANDLE;
+	VkSemaphore vkRenderFinishedSemaphore = VK_NULL_HANDLE;
+	VkFence vkInFlightFence = VK_NULL_HANDLE;
+
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 

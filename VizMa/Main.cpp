@@ -21,6 +21,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 			context.drawFrame();
 		}
 
+		MessageBoxA(
+			nullptr,
+			nullptr,
+			"r u sure?",
+			MB_OK | MB_ICONERROR
+		);
+
 		return 0;
 	}
 	catch (std::exception& e)

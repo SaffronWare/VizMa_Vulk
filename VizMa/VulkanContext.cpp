@@ -40,6 +40,16 @@ void VulkanContext::drawFrame()
 		throw std::runtime_error("failed to submit to graphics queue");
 	}
 
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = &vkRenderFinishedSemaphore;
+	presentInfo.pSwapchains = &vkSwapchain;
+	presentInfo.swapchainCount = 1;
+	presentInfo.pImageIndices = &vkSwapchainImageIndex;
+	
+	vkQueuePresentKHR(vkPresentQueue, &presentInfo);
 }
 
 
@@ -570,6 +580,17 @@ void VulkanContext::CreateRenderPass()
 	vkColorAttachmentRef.attachment = 0;
 	vkColorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+
 	VkSubpassDescription vkSubpass{};
 	vkSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	vkSubpass.colorAttachmentCount = 1;
@@ -581,6 +602,8 @@ void VulkanContext::CreateRenderPass()
 	vkRenderPassInfo.pAttachments = &vkColorAttachment;
 	vkRenderPassInfo.subpassCount = 1;
 	vkRenderPassInfo.pSubpasses = &vkSubpass;
+	vkRenderPassInfo.dependencyCount = 1;
+	vkRenderPassInfo.pDependencies = &dependency;
 
 	if (vkCreateRenderPass(vkLogicalDevice, &vkRenderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");

@@ -78,11 +78,11 @@ bool Window::loop()
 
 		if (msg.message == WM_QUIT)
 		{
-			return true;
+			return false;
 		}
 	}
 
-	return false;
+	return true;
 	
 }
 

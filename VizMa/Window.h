@@ -4,7 +4,6 @@
 #include "DEBUG.h"
 #include <optional>
 
-#include "VulkanContext.h"
 
 constexpr const char* WINDOW_CLASS_NAME = "Window Class";
 

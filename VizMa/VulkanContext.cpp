@@ -637,6 +637,8 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 
 VulkanContext::~VulkanContext()
 {
+	vkDestroyCommandPool(vkLogicalDevice, vkCommandPool, nullptr);
+
 	for (VkFramebuffer& vkFrameBuffer : vkSwapchainFrameBuffers)
 	{
 		vkDestroyFramebuffer(vkLogicalDevice, vkFrameBuffer, nullptr);

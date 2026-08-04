@@ -612,12 +612,56 @@ void VulkanContext::CreateCommandBuffer()
 	{
 		throw std::runtime_error("Failed to create command buffer!");
 	}
+}
+
+void VulkanContext::recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex) const
+{
+	VkCommandBufferBeginInfo vkBeginInfo{};
+	vkBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	
+	if (vkBeginCommandBuffer(buffer, &vkBeginInfo) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to beign command buffer!");
+	}
+
+	VkRenderPassBeginInfo vkRenderBeginInfo{};
+	vkRenderBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	vkRenderBeginInfo.framebuffer = vkSwapchainFrameBuffers[imageIndex];
+	vkRenderBeginInfo.renderPass = vkRenderPass;
+	vkRenderBeginInfo.renderArea.offset = { 0,0 };
+	vkRenderBeginInfo.renderArea.extent = vkSurfaceExtent;
+	VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vkRenderBeginInfo.pClearValues = &clearValue;
+	vkRenderBeginInfo.clearValueCount = 1;
+
+	vkCmdBeginRenderPass(buffer, &vkRenderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkGraphicsPipeline);
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(vkSurfaceExtent.width);
+	viewport.height = static_cast<float>(vkSurfaceExtent.height);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(buffer, 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = vkSurfaceExtent;
+	vkCmdSetScissor(buffer, 0, 1, &scissor);
+
+	vkCmdDraw(buffer, 3, 1, 0, 0);
+
+	vkCmdEndRenderPass(buffer);
+
+	if (vkEndCommandBuffer(buffer) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
+	}
 
 }
 
 
-VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code)
+VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code) const
 {
 	VkShaderModuleCreateInfo vkCreateInfo{};
 	vkCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

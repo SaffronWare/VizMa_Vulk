@@ -57,6 +57,8 @@ private:
 	void CreateCommandPool();
 	void CreateCommandBuffer();
 
+	void recordCommandBuffer(const VkCommandBuffer& buffer, uint32_t imageIndex) const;
+
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
@@ -70,7 +72,7 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) const;
 	
-	VkShaderModule createShaderModule(const std::vector<uint32_t>& code);
+	VkShaderModule createShaderModule(const std::vector<uint32_t>& code) const;
 
 	VkApplicationInfo appInfo{};
 
@@ -85,7 +87,7 @@ private:
 	VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 	VkPipeline vkGraphicsPipeline = VK_NULL_HANDLE;
 	VkCommandPool vkCommandPool = VK_NULL_HANDLE;
-	VkCommandBuffer vkCommandbuffer = VK_NULL_HANDLE;
+	VkCommandBuffer vkCommandBuffer = VK_NULL_HANDLE;
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 

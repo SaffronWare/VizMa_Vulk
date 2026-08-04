@@ -400,7 +400,7 @@ void VulkanContext::CreateImageViews()
 void VulkanContext::CreateGraphicsPipeline()
 {
 	GLSLShaderCompileInfo info;
-	info.source = FileUtils::readFile("C:\\Users\\aryan\\source\\repos\\VizMa_Vulk\\VizMa\\Shaders\\versdt.glsl");
+	info.source = FileUtils::readFile("C:\\Users\\aryan\\source\\repos\\VizMa_Vulk\\VizMa\\Shaders\\vert.glsl");
 	info.stage = EShLangVertex;
 	std::vector<uint32_t> vertexSPIRV = glslLangContext.compileShader(info);
 
@@ -558,6 +558,49 @@ void VulkanContext::CreateRenderPass()
 	}
 }
 
+void VulkanContext::CreateFrameBuffers()
+{
+	vkSwapchainFrameBuffers.resize(vkSwapchainImages.size());
+
+	for (size_t i = 0; i < vkSwapchainFrameBuffers.size(); i++)
+	{
+		VkImageView vkImageViewAttachments[] = {
+			vkSwapchainImageViews[i]
+		};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = vkRenderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = vkImageViewAttachments;
+		framebufferInfo.width = vkSurfaceExtent.width;
+		framebufferInfo.height = vkSurfaceExtent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(vkLogicalDevice, &framebufferInfo, nullptr, &vkSwapchainFrameBuffers[i]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create fame buffer!\n");
+		}
+	}
+}
+
+void VulkanContext::CreateCommandPool()
+{
+	QueueFamilyIndices vkQueueIndices = findPhysicalDeviceQueueFamilies(vkPhysicalDevice);
+	
+	VkCommandPoolCreateInfo vkCommandPoolInfo{};
+	vkCommandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	vkCommandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	vkCommandPoolInfo.queueFamilyIndex = vkQueueIndices.graphicsFamily.value();
+
+	if (vkCreateCommandPool(vkLogicalDevice, &vkCommandPoolInfo, nullptr, &vkCommandPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create command pool!\n");
+	}
+
+}
+
+
 VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code)
 {
 	VkShaderModuleCreateInfo vkCreateInfo{};
@@ -587,11 +630,18 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateImageViews();
 	CreateRenderPass();
 	CreateGraphicsPipeline();
+	CreateFrameBuffers();
+	CreateCommandPool();
 }
 
 
 VulkanContext::~VulkanContext()
 {
+	for (VkFramebuffer& vkFrameBuffer : vkSwapchainFrameBuffers)
+	{
+		vkDestroyFramebuffer(vkLogicalDevice, vkFrameBuffer, nullptr);
+	}
+
 	vkDestroyPipeline(vkLogicalDevice, vkGraphicsPipeline, nullptr);
 	vkDestroyRenderPass(vkLogicalDevice, vkRenderPass, nullptr);
 	vkDestroyPipelineLayout(vkLogicalDevice, vkPipelineLayout, nullptr);

@@ -53,6 +53,8 @@ private:
 	void CreateImageViews();
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
+	void CreateFrameBuffers();
+	void CreateCommandPool();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
@@ -81,12 +83,14 @@ private:
 	VkRenderPass vkRenderPass = VK_NULL_HANDLE;
 	VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 	VkPipeline vkGraphicsPipeline = VK_NULL_HANDLE;
+	VkCommandPool vkCommandPool = VK_NULL_HANDLE;
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 
 	std::vector<VkImage> vkSwapchainImages;
 	std::vector<VkImageView> vkSwapchainImageViews;
+	std::vector<VkFramebuffer> vkSwapchainFrameBuffers;
 
 	VkSurfaceFormatKHR vkSurfaceFormat;
 	VkExtent2D vkSurfaceExtent;

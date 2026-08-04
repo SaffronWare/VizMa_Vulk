@@ -223,10 +223,10 @@ void VulkanContext::CreateLogicalDevice()
 	QueueFamilyIndices indices = findPhysicalDeviceQueueFamilies(vkPhysicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> vkQueueCreateInfos;
-	std::set<uint32_t> vkUniqueQueueIndices = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+	std::set<uint32_t> vkUniqueQueueFamilyIndices = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	float vkQueuePriority = 1.0f;
-	for (uint32_t vkQueueIndex : vkUniqueQueueIndices)
+	for (uint32_t vkQueueIndex : vkUniqueQueueFamilyIndices)
 	{
 		VkDeviceQueueCreateInfo vkQueueCreateInfo{};
 		vkQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -241,7 +241,7 @@ void VulkanContext::CreateLogicalDevice()
 	
 	VkDeviceCreateInfo vkDeviceCreationInfo{};
 	vkDeviceCreationInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	vkDeviceCreationInfo.queueCreateInfoCount = static_cast<uint32_t>(vkUniqueQueueIndices.size());
+	vkDeviceCreationInfo.queueCreateInfoCount = static_cast<uint32_t>(vkUniqueQueueFamilyIndices.size());
 	vkDeviceCreationInfo.pQueueCreateInfos = vkQueueCreateInfos.data();
 	vkDeviceCreationInfo.pEnabledFeatures = &vkDeviceFeatures;
 	vkDeviceCreationInfo.enabledExtensionCount = static_cast<uint32_t>(vkRequiredDeviceExtensions.size());
@@ -333,13 +333,13 @@ void VulkanContext::CreateSwapchain()
 	vkSwapchainCreationInfo.imageColorSpace = vkSurfaceFormat.colorSpace;
 	vkSwapchainCreationInfo.presentMode = vkSurfacePresentMode;
 	vkSwapchainCreationInfo.imageExtent = vkSurfaceExtent;
-	vkSwapchainCreationInfo.imageArrayLayers = 1;
+	vkSwapchainCreationInfo.imageArrayLayers = 1; //stereographics stuff.. ignore
 	vkSwapchainCreationInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 	QueueFamilyIndices vkQueueIndices = findPhysicalDeviceQueueFamilies(vkPhysicalDevice);
 	uint32_t vkQueueIndicesArray[2] = { vkQueueIndices.graphicsFamily.value(), vkQueueIndices.presentFamily.value() };
 
-	if (vkQueueIndices.graphicsFamily != vkQueueIndices.presentFamily)
+	if (vkQueueIndices.graphicsFamily.value() != vkQueueIndices.presentFamily.value())
 	{
 		vkSwapchainCreationInfo.queueFamilyIndexCount = 2;
 		vkSwapchainCreationInfo.pQueueFamilyIndices = vkQueueIndicesArray;
@@ -347,7 +347,6 @@ void VulkanContext::CreateSwapchain()
 	}
 	else
 	{
-		// ignore for now
 		vkSwapchainCreationInfo.queueFamilyIndexCount = 0;
 		vkSwapchainCreationInfo.pQueueFamilyIndices = nullptr;
 		vkSwapchainCreationInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;

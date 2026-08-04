@@ -57,7 +57,7 @@ private:
 	void CreateCommandPool();
 	void CreateCommandBuffer();
 
-	void recordCommandBuffer(const VkCommandBuffer& buffer, uint32_t imageIndex) const;
+	void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex) const;
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;

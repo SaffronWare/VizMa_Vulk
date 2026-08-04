@@ -490,6 +490,7 @@ void VulkanContext::CreateGraphicsPipeline()
 	vkColorBlending.logicOpEnable = VK_FALSE;
 	vkColorBlending.attachmentCount = 1;
 	vkColorBlending.pAttachments = &vkColorBlendAttachment;
+	
 
 	VkPipelineLayoutCreateInfo vkPipelineLayoutInfo{};
 	vkPipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -501,6 +502,22 @@ void VulkanContext::CreateGraphicsPipeline()
 
 
 	
+}
+
+void VulkanContext::CreateRenderPass()
+{
+	VkAttachmentDescription vkColorAttachment{};
+	vkColorAttachment.format = vkSurfaceFormat.format;
+	vkColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+	vkColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	vkColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	
+	// no stenciles so we dont give an idgaf
+	vkColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	vkColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+	vkColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	vkColorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 }
 
 VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code)
@@ -530,6 +547,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateLogicalDevice();
 	CreateSwapchain();
 	CreateImageViews();
+	CreateRenderPass();
 	CreateGraphicsPipeline();
 }
 

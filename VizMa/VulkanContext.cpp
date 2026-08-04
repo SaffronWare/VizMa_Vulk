@@ -518,6 +518,26 @@ void VulkanContext::CreateRenderPass()
 
 	vkColorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	vkColorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	VkAttachmentReference vkColorAttachmentRef{};
+	vkColorAttachmentRef.attachment = 0;
+	vkColorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription vkSubpass{};
+	vkSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	vkSubpass.colorAttachmentCount = 1;
+	vkSubpass.pColorAttachments = &vkColorAttachmentRef;
+
+	VkRenderPassCreateInfo vkRenderPassInfo{};
+	vkRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	vkRenderPassInfo.attachmentCount = 1;
+	vkRenderPassInfo.pAttachments = &vkColorAttachment;
+	vkRenderPassInfo.subpassCount = 1;
+	vkRenderPassInfo.pSubpasses = &vkSubpass;
+
+	if (vkCreateRenderPass(vkLogicalDevice, &vkRenderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create render pass!");
+	}
 }
 
 VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& code)

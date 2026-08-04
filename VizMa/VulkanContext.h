@@ -78,6 +78,7 @@ private:
 	VkQueue vkGraphicsQueue = VK_NULL_HANDLE;
 	VkQueue vkPresentQueue = VK_NULL_HANDLE;
 	VkSwapchainKHR vkSwapchain = VK_NULL_HANDLE;
+	VkRenderPass vkRenderPass = VK_NULL_HANDLE;
 	VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};

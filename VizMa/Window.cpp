@@ -46,7 +46,7 @@ Window::Window(HINSTANCE hInstance, int nCmdShow, const char* app_title) :
 		app_title,
 		WS_OVERLAPPEDWINDOW,
 
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT, 1000, 1000,
 		NULL,
 		NULL,
 		hInstance,

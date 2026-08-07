@@ -12,7 +12,7 @@ const int MAX_NUM_MARCHES = 100;
 
 
 vec3 camera_position = vec3(0.0, 0.0, -1.0);
-float focal = 0.5;
+float focal = 1.0;
 
 vec3 front = vec3(0.0, 0.0, 1.0);
 vec3 right = vec3(1.0, 0.0, 0.0);
@@ -26,6 +26,7 @@ struct HitInfo
     int matID;
     bool hit;
     float dist;
+    vec3 rd;
 };
 
 struct Ray {
@@ -59,9 +60,31 @@ vec3 normal(vec3 pos)
     return computed_normal;
 }
 
+vec3 light_dir = normalize(vec3(0.3f, -1.0f, -0.4f));
+float ambient = 0.2f;
+float diffuse = 1.0f;
+float norm_shade(vec3 norm)
+{
+    return max(ambient, diffuse * dot(norm,light_dir));
+}
+
+vec4 lerp(vec4 a, vec4 b, float t)
+{
+    return a * (1-t) + b*t;
+}
+
+vec4 skylow = vec4(0.9, 0.9, 1.0, 1.0);
+vec4 skyhigh =  vec4(0.4, 0.6, 1.0, 1.0);
+vec4 sky(vec3 dir)
+{
+    float t = clamp(abs(acos(length(vec2(dir.x, dir.z)))),0,1) / acos(0);
+    return lerp(skylow, skyhigh, abs(4*t*t));
+
+}
+
 vec4 get_shade(HitInfo info)
 {
-    return (info.hit) ? vec4(0.0) : vec4(1.0);
+    return (info.hit) ? vec4(1.0) * norm_shade(info.normal) : sky(info.rd);
 }
 
 void main() {
@@ -70,6 +93,7 @@ void main() {
     ray.rp = camera_position;
 
     HitInfo hit;
+    hit.rd = ray.rd;
 
     outColor = vec4(0.6f, 0.7f, 1.0f,1.0f);
 
@@ -79,6 +103,8 @@ void main() {
 
         if (hit.hit)
         {
+            
+            hit.normal = normal(ray.rp);
             outColor = get_shade(hit);
             break;
         }
@@ -89,5 +115,11 @@ void main() {
         
         ray.rp += hit.dist * ray.rd;
 
+    }
+
+    if (!hit.hit)
+    {
+        hit.rd = ray.rd;
+        outColor = get_shade(hit);
     }
 }

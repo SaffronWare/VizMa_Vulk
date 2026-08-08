@@ -51,10 +51,10 @@ float terrain(vec3 p)
         return abs(p.y) - a;
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 6; i++)
     {
         ty += a * noise_value_plane(0, xz);
-        a /= 2.0f;
+        a /= 2.3f;
         xz *= 2.0f;
     }   
 
@@ -101,7 +101,7 @@ HitInfo march_ray(vec3 rp) {
     HitInfo hit;
 
 
-    float d = terrain(rp+vec3(0,-1,0));
+    float d = terrain(rp+vec3(-1,0.65,0));
  
     hit.dist = d;
     hit.matID = 1;

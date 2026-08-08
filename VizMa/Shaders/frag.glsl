@@ -19,6 +19,7 @@ float scubic(float t)
     return 3*t*t - 2 * t*t*t;
 }
 
+
 float noise_value_plane(int seed, vec2 p)
 {
     float val = 0;
@@ -45,30 +46,38 @@ float noise_value_plane(int seed, vec2 p)
     return val;
 }
 
-float terrain(vec3 p, int quality)
+float terrain(vec2 xz, int quality)
 {
 
     float ty = 0;
-    vec2 xz = p.xz;
     //xz /= 1.4;
     float a = 1.0f;
     float theta = 0.0f;
-
-    if (abs(p.y) > 2*a)
-    {
-        return abs(p.y) - a;
-    }
 
     for (int i = 0; i < quality; i++)
     {
         ty += a * noise_value_plane(0, xz);
         theta = chash11(i) * acos(1);
+        xz = rotate(xz,theta);
         a /= 2.3;
-        xz *= 2.04;
-    }   
+        xz *= 2.0;
+    }
+
+    return ty;
+}
+
+float terrainSDF(vec3 p, int quality)
+{
+
+    if (abs(p.y) > 2)
+    {
+        return abs(p.y) - 2;
+    }
 
    
-    return abs(p.y - ty);
+
+    
+    return abs(p.y - terrain(p.xz, quality));
 }
 
 layout(location = 0) out vec4 outColor;
@@ -111,7 +120,7 @@ HitInfo march_ray(vec3 rp) {
 
 
     float tq = 10;
-    tq *= float(exp(-0.10 * length(rp-camera_position)));
+    tq *= float(exp(0 *-0.10 * length(rp-camera_position)));
     float d = terrain(rp+vec3(-1,0.75,0), int(tq));
  
     hit.dist = d;
@@ -152,11 +161,16 @@ vec4 lerp(vec4 a, vec4 b, float t)
 }
 
 vec4 skylow = vec4(0.9, 0.9, 1.0, 1.0);
-vec4 skyhigh =  vec4(0.4, 0.6, 1.0, 1.0);
+vec4 skyhigh =  vec4(0.1, 0.3, 1.0, 1.0);
+float assumed_sky_height = 20;
 vec4 sky(vec3 dir)
 {
-    float t = clamp(abs(acos(length(vec2(dir.x, dir.z)))),0,1) / acos(0);
-    return lerp(skylow, skyhigh, abs(6*t*t));
+    float t = clamp(100*abs(acos(length(vec2(dir.x, dir.z)))),0,1);
+    vec4 def_sky =  lerp(skylow, skyhigh, abs(t));
+
+    
+
+    vec4 cloud_mask = terrain()
 
 }
 

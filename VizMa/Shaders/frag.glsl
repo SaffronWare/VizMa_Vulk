@@ -12,7 +12,7 @@ float scubic(float t)
     return 3*t*t - 2 * t*t*t;
 }
 
-float noise_value_place(int seed, vec2 p)
+float noise_value_plane(int seed, vec2 p)
 {
     float val = 0;
 
@@ -38,6 +38,11 @@ float noise_value_place(int seed, vec2 p)
     return val;
 }
 
+float terrain(vec3 p)
+{
+    return (p.y - noise_value_plane(0, p.xz));
+}
+
 layout(location = 0) out vec4 outColor;
 
 layout(location = 0) in vec3 fragColor;
@@ -47,6 +52,7 @@ const float NORMAL_EPSILON = 0.01;
 const float MARCH_EPSILON = 0.0001;
 const float MAX_MARCH_DIST = 1000;
 const int MAX_NUM_MARCHES = 100;
+const float MARCH_COEFF = 0.2;
 
 
 vec3 camera_position = vec3(0.0, 0.0, -3.0);
@@ -78,7 +84,7 @@ HitInfo march_ray(vec3 rp) {
     hit.dist = length(rp - vec3(0,0,3)) - 1.0f;
     hit.matID = 0;
 
-    hit.hit = (abs(hit.dist) < MARCH_EPSILON);
+    hit.hit = (hit.dist < MARCH_EPSILON);
     return hit;
 }
 
@@ -151,7 +157,7 @@ void main() {
             break;
         }
         
-        ray.rp += hit.dist * ray.rd;
+        ray.rp += hit.dist * ray.rd * MARCH_COEFF;
 
     }
 

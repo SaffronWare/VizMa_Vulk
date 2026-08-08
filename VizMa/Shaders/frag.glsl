@@ -71,7 +71,7 @@ float terrainSDF(vec3 p, int quality)
 
     if (abs(p.y) > 2)
     {
-        return abs(p.y) - 2;
+        return abs(p.y) - 1;
     }
 
     return abs(p.y - terrain(p.xz, quality));
@@ -159,20 +159,26 @@ vec4 lerp(vec4 a, vec4 b, float t)
 
 vec4 skylow = vec4(0.9, 0.9, 1.0, 1.0);
 vec4 skyhigh =  vec4(0.1, 0.3, 1.0, 1.0);
-float assumed_sky_height = 20;
+float assumed_sky_height = 40;
 vec4 sky(HitInfo info)
 {
-    vec3 dir = info.rd;
-    float t = clamp(100*abs(acos(length(vec2(dir.x, dir.z)))),0,1);
-    vec4 def_sky =  lerp(skylow, skyhigh, abs(t));
+    vec4 def_sky;
+    float t = clamp(10*abs(acos(length(vec2(info.rd.x, info.rd.z)))),0,1);
+    def_sky = lerp(skylow, skyhigh, abs(t));
 
     
     float cm = 0.0;
     if (abs(info.rd.y) > MARCH_EPSILON)
     {
-        vec2 projected = (camera_position + info.rd * (assumed_sky_height - camera_position.y) / info.rd.y).xz; 
+        vec2 projected = (camera_position + info.rd * (assumed_sky_height - camera_position.y) / info.rd.y).xz;
+        projected /= 140;
+        cm = terrain(projected, 4);
+        t = smoothstep(-1, 1.5, cm);
+        t *= t*t*t;
+        def_sky = lerp(def_sky, vec4(1), t);
     }
-    vec4 cloud_mask = terrain()
+    return def_sky;
+    
 
 }
 
@@ -187,6 +193,7 @@ void main() {
     ray.rp = camera_position;
 
     HitInfo hit;
+    hit.hit = false;
     hit.rd = ray.rd;
 
     outColor = vec4(0.6f, 0.7f, 1.0f,1.0f);

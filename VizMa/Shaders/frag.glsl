@@ -1,11 +1,41 @@
 #version 450
 
-
 float chash11(float p) {
     p = fract(p * .1031);
     p *= p + 33.33;
     p *= p + p;
     return fract(p);
+}
+
+float scubic(float t)
+{
+    return 3*t*t - 2 * t*t*t;
+}
+
+float noise_value_place(int seed, vec2 p)
+{
+    float val = 0;
+
+    float xt = fract(p.x);
+    float i = p.x - xt;
+
+    float yt = fract(p.y);
+    float j = p.y - yt;
+
+    float a = chash11(849 * seed + 384 * i +  1911 * j);
+    i += 1;
+    float b = chash11(849 * seed + 384 * i +  1911 * j);
+    j += 1;
+    float d = chash11(849 * seed + 384 * i +  1911 * j);
+    i -= 1;
+    float c = chash11(849 * seed + 384 * i +  1911 * j);
+            
+    val += a;
+    val += (b-a) * scubic(xt);
+    val += (c-a) * scubic(yt);
+    val += (d-b-c+a) * scubic(xt) * scubic(yt);
+
+    return val;
 }
 
 layout(location = 0) out vec4 outColor;

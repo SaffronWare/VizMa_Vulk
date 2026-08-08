@@ -1,5 +1,13 @@
 #version 450
 
+
+float chash11(float p) {
+    p = fract(p * .1031);
+    p *= p + 33.33;
+    p *= p + p;
+    return fract(p);
+}
+
 layout(location = 0) out vec4 outColor;
 
 layout(location = 0) in vec3 fragColor;
@@ -11,8 +19,8 @@ const float MAX_MARCH_DIST = 1000;
 const int MAX_NUM_MARCHES = 100;
 
 
-vec3 camera_position = vec3(0.0, 0.0, -1.0);
-float focal = 1.0;
+vec3 camera_position = vec3(0.0, 0.0, -3.0);
+float focal = 2.0;
 
 vec3 front = vec3(0.0, 0.0, 1.0);
 vec3 right = vec3(1.0, 0.0, 0.0);
@@ -78,7 +86,7 @@ vec4 skyhigh =  vec4(0.4, 0.6, 1.0, 1.0);
 vec4 sky(vec3 dir)
 {
     float t = clamp(abs(acos(length(vec2(dir.x, dir.z)))),0,1) / acos(0);
-    return lerp(skylow, skyhigh, abs(4*t*t));
+    return lerp(skylow, skyhigh, abs(6*t*t));
 
 }
 

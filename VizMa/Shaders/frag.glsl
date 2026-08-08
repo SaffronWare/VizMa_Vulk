@@ -74,9 +74,6 @@ float terrainSDF(vec3 p, int quality)
         return abs(p.y) - 2;
     }
 
-   
-
-    
     return abs(p.y - terrain(p.xz, quality));
 }
 
@@ -121,7 +118,7 @@ HitInfo march_ray(vec3 rp) {
 
     float tq = 10;
     tq *= float(exp(0 *-0.10 * length(rp-camera_position)));
-    float d = terrain(rp+vec3(-1,0.75,0), int(tq));
+    float d = terrainSDF(rp+vec3(-1,0.75,0), int(tq));
  
     hit.dist = d;
     hit.matID = 1;
@@ -163,20 +160,25 @@ vec4 lerp(vec4 a, vec4 b, float t)
 vec4 skylow = vec4(0.9, 0.9, 1.0, 1.0);
 vec4 skyhigh =  vec4(0.1, 0.3, 1.0, 1.0);
 float assumed_sky_height = 20;
-vec4 sky(vec3 dir)
+vec4 sky(HitInfo info)
 {
+    vec3 dir = info.rd;
     float t = clamp(100*abs(acos(length(vec2(dir.x, dir.z)))),0,1);
     vec4 def_sky =  lerp(skylow, skyhigh, abs(t));
 
     
-
+    float cm = 0.0;
+    if (abs(info.rd.y) > MARCH_EPSILON)
+    {
+        vec2 projected = (camera_position + info.rd * (assumed_sky_height - camera_position.y) / info.rd.y).xz; 
+    }
     vec4 cloud_mask = terrain()
 
 }
 
 vec4 get_shade(HitInfo info)
 {
-    return (info.hit) ? vec4(1.0) * norm_shade(info.normal) : sky(info.rd);
+    return (info.hit) ? vec4(1.0) * norm_shade(info.normal) : sky(info);
 }
 
 void main() {

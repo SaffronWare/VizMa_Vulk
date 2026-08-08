@@ -51,11 +51,11 @@ float terrain(vec3 p)
         return abs(p.y) - a;
     }
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 1; i++)
     {
         ty += a * noise_value_plane(0, xz);
-        a /= 2.3f;
-        xz *= 2.0f;
+        a /= 2.25;
+        xz *= 2.3;
     }   
 
    
@@ -67,14 +67,14 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 uv;
 
-const float NORMAL_EPSILON = 0.01;
-const float MARCH_EPSILON = 0.0001;
-const float MAX_MARCH_DIST = 1000;
+const float NORMAL_EPSILON = 0.0001;
+const float MARCH_EPSILON = 0.01;
+const float MAX_MARCH_DIST = 5;
 const int MAX_NUM_MARCHES = 10000;
-const float MARCH_COEFF = 0.02;
+const float MARCH_COEFF = 0.05;
 
 
-vec3 camera_position = vec3(0.0, 0.0, -3.0);
+vec3 camera_position = vec3(0.0, -1.0, -3.0);
 float focal = 2.0;
 
 vec3 front = vec3(0.0, 0.0, 1.0);
@@ -101,7 +101,7 @@ HitInfo march_ray(vec3 rp) {
     HitInfo hit;
 
 
-    float d = terrain(rp+vec3(-1,0.65,0));
+    float d = terrain(rp+vec3(-1,0.75,0));
  
     hit.dist = d;
     hit.matID = 1;
@@ -127,7 +127,7 @@ vec3 normal(vec3 pos)
     return normalize(computed_normal);
 }
 
-vec3 light_dir = normalize(vec3(0.3f, -1.0f, -1.0f));
+vec3 light_dir = normalize(vec3(0.0f, -1.0f, -0.0f));
 float ambient = 0.2f;
 float diffuse = 1.0f;
 float norm_shade(vec3 norm)

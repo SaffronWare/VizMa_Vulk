@@ -40,7 +40,7 @@ float noise_value_plane(int seed, vec2 p)
 
 float terrain(vec3 p)
 {
-    return (p.y - noise_value_plane(0, p.xz));
+    return abs(p.y - noise_value_plane(0, p.xz));
 }
 
 layout(location = 0) out vec4 outColor;
@@ -51,8 +51,8 @@ layout(location = 1) in vec2 uv;
 const float NORMAL_EPSILON = 0.01;
 const float MARCH_EPSILON = 0.0001;
 const float MAX_MARCH_DIST = 1000;
-const int MAX_NUM_MARCHES = 100;
-const float MARCH_COEFF = 0.2;
+const int MAX_NUM_MARCHES = 10000;
+const float MARCH_COEFF = 0.02;
 
 
 vec3 camera_position = vec3(0.0, 0.0, -3.0);
@@ -83,6 +83,13 @@ HitInfo march_ray(vec3 rp) {
 
     hit.dist = length(rp - vec3(0,0,3)) - 1.0f;
     hit.matID = 0;
+    
+    float d = terrain(rp+vec3(0,-1,0));
+    if (d < hit.dist)
+    {
+        hit.dist = d;
+        hit.matID = 1;
+    }
 
     hit.hit = (hit.dist < MARCH_EPSILON);
     return hit;
@@ -149,6 +156,10 @@ void main() {
         {
             
             hit.normal = normal(ray.rp);
+            if (dot(hit.normal, ray.rd) > 0)
+            {
+                hit.normal = -hit.normal;
+            }
             outColor = get_shade(hit);
             break;
         }

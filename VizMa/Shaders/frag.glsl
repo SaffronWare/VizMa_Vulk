@@ -1,5 +1,12 @@
 #version 450
 
+vec2 rotate(vec2 p, float t)
+{
+    float c = cos(t);
+    float s = sin(t);
+    return vec2(p.x * c - p.y * s, p.x * s + p.y * c);
+}
+
 float chash11(float p) {
     p = fract(p * .1031);
     p *= p + 33.33;
@@ -38,24 +45,26 @@ float noise_value_plane(int seed, vec2 p)
     return val;
 }
 
-float terrain(vec3 p)
+float terrain(vec3 p, int quality)
 {
-    
-    
+
     float ty = 0;
     vec2 xz = p.xz;
+    //xz /= 1.4;
     float a = 1.0f;
+    float theta = 0.0f;
 
     if (abs(p.y) > 2*a)
     {
         return abs(p.y) - a;
     }
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < quality; i++)
     {
         ty += a * noise_value_plane(0, xz);
-        a /= 2.25;
-        xz *= 2.3;
+        theta = chash11(i) * acos(1);
+        a /= 2.3;
+        xz *= 2.04;
     }   
 
    
@@ -74,7 +83,7 @@ const int MAX_NUM_MARCHES = 10000;
 const float MARCH_COEFF = 0.05;
 
 
-vec3 camera_position = vec3(0.0, -1.0, -3.0);
+vec3 camera_position = vec3(0.0, -0.0, -3.0);
 float focal = 2.0;
 
 vec3 front = vec3(0.0, 0.0, 1.0);
@@ -101,7 +110,9 @@ HitInfo march_ray(vec3 rp) {
     HitInfo hit;
 
 
-    float d = terrain(rp+vec3(-1,0.75,0));
+    float tq = 10;
+    tq *= float(exp(-0.10 * length(rp-camera_position)));
+    float d = terrain(rp+vec3(-1,0.75,0), int(tq));
  
     hit.dist = d;
     hit.matID = 1;

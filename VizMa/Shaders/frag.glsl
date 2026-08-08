@@ -40,7 +40,26 @@ float noise_value_plane(int seed, vec2 p)
 
 float terrain(vec3 p)
 {
-    return abs(p.y - noise_value_plane(0, p.xz));
+    
+    
+    float ty = 0;
+    vec2 xz = p.xz;
+    float a = 1.0f;
+
+    if (abs(p.y) > 2*a)
+    {
+        return abs(p.y) - a;
+    }
+
+    for (int i = 0; i < 10; i++)
+    {
+        ty += a * noise_value_plane(0, xz);
+        a /= 2.0f;
+        xz *= 2.0f;
+    }   
+
+   
+    return abs(p.y - ty);
 }
 
 layout(location = 0) out vec4 outColor;
@@ -81,15 +100,12 @@ struct Ray {
 HitInfo march_ray(vec3 rp) {
     HitInfo hit;
 
-    hit.dist = length(rp - vec3(0,0,3)) - 1.0f;
-    hit.matID = 0;
-    
+
     float d = terrain(rp+vec3(0,-1,0));
-    if (d < hit.dist)
-    {
-        hit.dist = d;
-        hit.matID = 1;
-    }
+ 
+    hit.dist = d;
+    hit.matID = 1;
+    
 
     hit.hit = (hit.dist < MARCH_EPSILON);
     return hit;
@@ -108,10 +124,10 @@ vec3 normal(vec3 pos)
     computed_normal.y = (march_ray(offy).dist - base.dist) / NORMAL_EPSILON;
     computed_normal.z = (march_ray(offz).dist - base.dist) / NORMAL_EPSILON;
 
-    return computed_normal;
+    return normalize(computed_normal);
 }
 
-vec3 light_dir = normalize(vec3(0.3f, -1.0f, -0.4f));
+vec3 light_dir = normalize(vec3(0.3f, -1.0f, -1.0f));
 float ambient = 0.2f;
 float diffuse = 1.0f;
 float norm_shade(vec3 norm)

@@ -82,7 +82,7 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 uv;
 
-const float NORMAL_EPSILON = 0.001;
+const float NORMAL_EPSILON = 0.0001;
 const float MARCH_EPSILON = 0.01;
 const float MAX_MARCH_DIST = 5;
 const int MAX_NUM_MARCHES = 10000;
@@ -250,8 +250,8 @@ vec4 get_mat_color(HitInfo info)
             float t = smoothstep(-1, 0.3, info.position.y-0.1);
             c= lerp(vec4(1.0), vec4(0.3,0.3,0.3,1), t);
             vec3 smooth_normal = normalize(normal(info.position,6.0));
-            //c = lerp(c, vec4(0.2, 0.9, 0.4, 1.0), smoothstep(-1,1.5, smooth_normal.y));
-            return vec4(-smooth_normal,1);
+            c = lerp(c, vec4(0.2, 0.6, 0.1, 1.0), smoothstep(0.6,0.9, -smooth_normal.y));
+            //return vec4(-smooth_normal,1);
             break;
     }
 

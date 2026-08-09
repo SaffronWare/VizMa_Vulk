@@ -74,7 +74,7 @@ float terrainSDF(vec3 p, int quality)
         return abs(p.y) - 1;
     }
 
-    return abs(p.y - terrain(p.xz, quality));
+    return -(p.y - terrain(p.xz, quality));
 }
 
 layout(location = 0) out vec4 outColor;
@@ -82,7 +82,7 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 uv;
 
-const float NORMAL_EPSILON = 0.0001;
+const float NORMAL_EPSILON = 0.001;
 const float MARCH_EPSILON = 0.01;
 const float MAX_MARCH_DIST = 5;
 const int MAX_NUM_MARCHES = 10000;
@@ -113,11 +113,9 @@ struct Ray {
     vec3 rd;
 };
 
-HitInfo march_ray(vec3 rp) {
+HitInfo march_ray(vec3 rp, float tq) {
     HitInfo hit;
 
-
-    float tq = 12;
     tq *= float(exp(-0.04 * length(rp-camera_position)));
     float d = terrainSDF(rp+vec3(-1,0.75,0), int(tq));
  
@@ -129,7 +127,7 @@ HitInfo march_ray(vec3 rp) {
     return hit;
 }
 
-vec3 normal(vec3 pos)
+vec3 normal(vec3 pos, float tq)
 {
     vec3 computed_normal;
 
@@ -137,10 +135,10 @@ vec3 normal(vec3 pos)
     vec3 offy = pos + vec3(0.0, NORMAL_EPSILON, 0.0);
     vec3 offz = pos + vec3(0.0, 0.0, NORMAL_EPSILON);
 
-    HitInfo base = march_ray(pos);
-    computed_normal.x = (march_ray(offx).dist - base.dist) / NORMAL_EPSILON;
-    computed_normal.y = (march_ray(offy).dist - base.dist) / NORMAL_EPSILON;
-    computed_normal.z = (march_ray(offz).dist - base.dist) / NORMAL_EPSILON;
+    HitInfo base = march_ray(pos,tq);
+    computed_normal.x = (march_ray(offx,tq).dist - base.dist) / NORMAL_EPSILON;
+    computed_normal.y = (march_ray(offy,tq).dist - base.dist) / NORMAL_EPSILON;
+    computed_normal.z = (march_ray(offz,tq).dist - base.dist) / NORMAL_EPSILON;
 
     return normalize(computed_normal);
 }
@@ -155,7 +153,7 @@ HitInfo getHit(Ray r) {
 
     for (int i = 0; i < MAX_NUM_MARCHES; i++)
     {
-        hit = march_ray(r.rp);
+        hit = march_ray(r.rp,12.0);
         
 
         if (hit.hit)
@@ -171,7 +169,7 @@ HitInfo getHit(Ray r) {
 
     }
 
-    hit.normal = normal(r.rp);
+    hit.normal = normal(r.rp, 12.0);
     if (dot(hit.normal, r.rd) > 0)
     {
         hit.normal = -hit.normal;
@@ -184,7 +182,7 @@ HitInfo getHit(Ray r) {
 }
 
 
-vec3 light_dir = normalize(vec3(0.0f, -1.0f, -0.0f));
+vec3 light_dir = normalize(vec3(-0.7f, -1.0f, 0.6f));
 float ambient = 0.2f;
 float diffuse = 1.0f;
 float norm_shade(HitInfo info)
@@ -250,7 +248,10 @@ vec4 get_mat_color(HitInfo info)
     {
         case 0:
             float t = smoothstep(-1, 0.3, info.position.y-0.1);
-            return lerp(vec4(1.0), vec4(0.3,0.3,0.3,1), t);
+            c= lerp(vec4(1.0), vec4(0.3,0.3,0.3,1), t);
+            vec3 smooth_normal = normalize(normal(info.position,6.0));
+            //c = lerp(c, vec4(0.2, 0.9, 0.4, 1.0), smoothstep(-1,1.5, smooth_normal.y));
+            return vec4(-smooth_normal,1);
             break;
     }
 

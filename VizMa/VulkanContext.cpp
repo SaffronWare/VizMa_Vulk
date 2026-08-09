@@ -450,13 +450,13 @@ void VulkanContext::CreateGraphicsPipeline()
 	VkShaderModule vkVertexShaderModule = createShaderModule(vertexSPIRV);
 	VkShaderModule vkFragmentShaderModule = createShaderModule(fragmentSPIRV);
 
-	VkPipelineShaderStageCreateInfo vkVertInfo;
+	VkPipelineShaderStageCreateInfo vkVertInfo{};
 	vkVertInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vkVertInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 	vkVertInfo.module = vkVertexShaderModule;
 	vkVertInfo.pName = "main";
 
-	VkPipelineShaderStageCreateInfo vkFragInfo;
+	VkPipelineShaderStageCreateInfo vkFragInfo{};
 	vkFragInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vkFragInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	vkFragInfo.module = vkFragmentShaderModule;

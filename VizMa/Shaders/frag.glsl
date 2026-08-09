@@ -122,7 +122,7 @@ HitInfo march_ray(vec3 rp) {
     float d = terrainSDF(rp+vec3(-1,0.75,0), int(tq));
  
     hit.dist = d;
-    hit.matID = 1;
+    hit.matID = 0;
     
 
     hit.hit = (hit.dist < MARCH_EPSILON);
@@ -196,9 +196,22 @@ vec4 fogsky(vec4 c, vec3 rd)
 
 }
 
+vec4 get_mat_color(HitInfo info)
+{
+    vec4  c;
+    switch (info.matID)
+    {
+        case 0:
+            return vec4(1.0);
+            break;
+    }
+
+    return c;
+}
+
 vec4 get_shade(HitInfo info)
 {
-    vec4 col = (info.hit) ? vec4(1.0) * norm_shade(info.normal) : sky(info);
+    vec4 col = (info.hit) ? get_mat_color(info) * norm_shade(info.normal) : sky(info);
     if (info.hit)
     {
         return foghit(col, info.accdist);

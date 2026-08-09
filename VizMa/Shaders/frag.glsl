@@ -145,12 +145,59 @@ vec3 normal(vec3 pos)
     return normalize(computed_normal);
 }
 
+HitInfo getHit(Ray r) {
+    HitInfo hit;
+    hit.hit = false;
+    float travel_dist = 0;
+    hit.rd = r.rd;
+
+    outColor = vec4(0.6f, 0.7f, 1.0f,1.0f);
+
+    for (int i = 0; i < MAX_NUM_MARCHES; i++)
+    {
+        hit = march_ray(r.rp);
+        
+
+        if (hit.hit)
+        {
+            break;
+        }
+        else if (hit.dist > MAX_MARCH_DIST)
+        {
+            break;
+        }
+        travel_dist += hit.dist;
+        r.rp += hit.dist * r.rd * MARCH_COEFF;
+
+    }
+
+    hit.normal = normal(r.rp);
+    if (dot(hit.normal, r.rd) > 0)
+    {
+        hit.normal = -hit.normal;
+    }
+    hit.accdist = travel_dist;
+    hit.position = r.rp;
+    hit.rd = r.rd;
+
+    return hit;
+}
+
+
 vec3 light_dir = normalize(vec3(0.0f, -1.0f, -0.0f));
 float ambient = 0.2f;
 float diffuse = 1.0f;
-float norm_shade(vec3 norm)
-{
-    return max(ambient, diffuse * dot(norm,light_dir));
+float norm_shade(HitInfo info)
+{   
+    Ray outray;
+    outray.rd = light_dir;
+    outray.rp = info.position + outray.rd * 2 * MARCH_EPSILON;
+    
+    if (!getHit(outray).hit)
+    {
+        return max(ambient, diffuse * dot(info.normal,light_dir));
+    }
+    return ambient;
 }
 
 vec4 lerp(vec4 a, vec4 b, float t)
@@ -202,7 +249,8 @@ vec4 get_mat_color(HitInfo info)
     switch (info.matID)
     {
         case 0:
-            return vec4(1.0);
+            float t = smoothstep(-1, 0.3, info.position.y-0.1);
+            return lerp(vec4(1.0), vec4(0.3,0.3,0.3,1), t);
             break;
     }
 
@@ -211,7 +259,7 @@ vec4 get_mat_color(HitInfo info)
 
 vec4 get_shade(HitInfo info)
 {
-    vec4 col = (info.hit) ? get_mat_color(info) * norm_shade(info.normal) : sky(info);
+    vec4 col = (info.hit) ? get_mat_color(info) * norm_shade(info) : sky(info);
     if (info.hit)
     {
         return foghit(col, info.accdist);
@@ -224,40 +272,7 @@ void main() {
     ray.rd = normalize(right * uv.x + up * uv.y + front * focal);
     ray.rp = camera_position;
 
-    HitInfo hit;
-    hit.hit = false;
-    float travel_dist = 0;
-    hit.rd = ray.rd;
-
-    outColor = vec4(0.6f, 0.7f, 1.0f,1.0f);
-
-    for (int i = 0; i < MAX_NUM_MARCHES; i++)
-    {
-        hit = march_ray(ray.rp);
-        
-
-        if (hit.hit)
-        {
-            break;
-        }
-        else if (hit.dist > MAX_MARCH_DIST)
-        {
-            break;
-        }
-        travel_dist += hit.dist;
-        ray.rp += hit.dist * ray.rd * MARCH_COEFF;
-
-    }
-
-    hit.normal = normal(ray.rp);
-    if (dot(hit.normal, ray.rd) > 0)
-    {
-        hit.normal = -hit.normal;
-    }
-    hit.accdist = travel_dist;
-
-
-    hit.rd = ray.rd;
+    HitInfo hit = getHit(ray);
     outColor = get_shade(hit);
     
 }

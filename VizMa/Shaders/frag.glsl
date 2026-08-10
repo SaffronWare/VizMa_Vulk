@@ -89,7 +89,7 @@ const int MAX_NUM_MARCHES = 10000;
 const float MARCH_COEFF = 0.05;
 
 
-vec3 camera_position = vec3(0.0, -0.0, -3.0);
+vec3 camera_position = vec3(0.0, -0.0, -3.0) + vec3(-1, 0.75, 0);
 float focal = 2.0;
 
 vec3 front = vec3(0.0, 0.0, 1.0);
@@ -113,14 +113,38 @@ struct Ray {
     vec3 rd;
 };
 
+
+
 HitInfo march_ray(vec3 rp, float tq) {
     HitInfo hit;
-
+    //rp += vec3(-1, 0.75, 0);
     tq *= float(exp(-0.04 * length(rp-camera_position)));
-    float d = terrainSDF(rp+vec3(-1,0.75,0), int(tq));
+
+    float d = terrainSDF(rp, int(tq));
  
     hit.dist = d;
     hit.matID = 0;
+
+    float d1 = 0;
+    //vec3 new_pos = vec3(mod(rp.x - 1.0, 2.0), rp.y, mod(rp.z,2.0));
+    if (rp.z > -4.0)
+    {
+        vec3 new_pos = rp;
+        float o = 0.02;
+        new_pos.x = mod(rp.x + o/2 , o) -o/2;
+        new_pos.z = mod(rp.z + o/2, o) -o/2;
+        vec2 ijp = rp.xz - new_pos.xz;
+
+        float r = 0.0005;
+        vec3 sphere_pos = vec3(0, terrain(ijp, 11) - r, 0) + r/2 * vec3(chash11(2.0 * ijp.x + 3.0 * ijp.y),0, chash11(5.0 * ijp.x + 2.0 * ijp.y));
+        d1 = length((new_pos - sphere_pos) / vec3(1,3,1)) - r;
+
+        if (d1 < d)
+        {
+            hit.dist = d1;
+            hit.matID = 1;
+        }
+    }
     
 
     hit.hit = (hit.dist < MARCH_EPSILON);
@@ -153,7 +177,7 @@ HitInfo getHit(Ray r) {
 
     for (int i = 0; i < MAX_NUM_MARCHES; i++)
     {
-        hit = march_ray(r.rp,12.0);
+        hit = march_ray(r.rp,11.0);
         
 
         if (hit.hit)
@@ -169,7 +193,7 @@ HitInfo getHit(Ray r) {
 
     }
 
-    hit.normal = normal(r.rp, 12.0);
+    hit.normal = normal(r.rp, 11.0);
     if (dot(hit.normal, r.rd) > 0)
     {
         hit.normal = -hit.normal;
@@ -230,7 +254,7 @@ vec4 sky(HitInfo info)
 
 vec4 foghit(vec4 c, float d)
 {
-    float t= 1-exp(-0.01 * d);
+    float t= 1-exp(-0.005 * d);
     return lerp(c, vec4(1.0), t);
 }
 
@@ -248,11 +272,13 @@ vec4 get_mat_color(HitInfo info)
     {
         case 0:
             float t = smoothstep(-1, 0.3, info.position.y-0.1);
-            c= lerp(vec4(1.0), vec4(0.3,0.3,0.3,1), t);
+            c= lerp(vec4(1.0), 2*vec4(0.4,0.2,0.1,1), t);
             vec3 smooth_normal = normalize(normal(info.position,6.0));
-            c = lerp(c, vec4(0.2, 0.6, 0.1, 1.0), smoothstep(0.6,0.9, -smooth_normal.y));
+            c = lerp(c, 2*vec4(0.07, 0.2, 0.1, 1.0), smoothstep(0.6,0.9, -smooth_normal.y));
             //return vec4(-smooth_normal,1);
             break;
+        case 1:
+            c = vec4(0,1,0,1);
     }
 
     return c;

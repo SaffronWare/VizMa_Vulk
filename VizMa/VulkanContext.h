@@ -58,6 +58,8 @@ private:
 	void CreateCommandPool();
 	void CreateCommandBuffer();
 	void CreateSyncObjects();
+	void RecreateSwapchain();
+	void CleanupSwapchain();
 
 	void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex) const;
 

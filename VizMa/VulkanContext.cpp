@@ -15,10 +15,16 @@ bool SwapchainSupportDetails::isSupported()
 void VulkanContext::drawFrame()
 {
 	vkWaitForFences(vkLogicalDevice, 1, &vkInFlightFence, VK_TRUE, UINT64_MAX);
-	vkResetFences(vkLogicalDevice, 1, &vkInFlightFence);
 
 	uint32_t vkSwapchainImageIndex;
-	vkAcquireNextImageKHR(vkLogicalDevice, vkSwapchain, UINT64_MAX, vkImageReadySemaphore, VK_NULL_HANDLE, &vkSwapchainImageIndex);
+	VkResult vkFetchImageResult = vkAcquireNextImageKHR(vkLogicalDevice, vkSwapchain, UINT64_MAX, vkImageReadySemaphore, VK_NULL_HANDLE, &vkSwapchainImageIndex);
+	if (vkFetchImageResult == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		RecreateSwapchain();
+		return;
+	}
+
+	vkResetFences(vkLogicalDevice, 1, &vkInFlightFence);
 
 	vkResetCommandBuffer(vkCommandBuffer, 0);
 
@@ -344,6 +350,8 @@ VkExtent2D VulkanContext::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfa
 			surfaceCapabilities.minImageExtent.height,
 			surfaceCapabilities.maxImageExtent.height);
 
+		LOG("WINDOW WIDTH: " << width << "\nWINDOW HIEHGT:" << height);
+
 		return actualExtent;
 	}
 
@@ -351,6 +359,7 @@ VkExtent2D VulkanContext::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfa
 
 void VulkanContext::CreateSwapchain()
 {
+	LOG("recreating swapchain\n");
 	SwapchainSupportDetails vkSwapchainDetails = querySwapchainSupportDetails(vkPhysicalDevice);
 
 	vkSurfaceFormat = chooseSwapSurfaceFormat(vkSwapchainDetails.vkSurfaceFormats);
@@ -398,7 +407,9 @@ void VulkanContext::CreateSwapchain()
 	vkSwapchainCreationInfo.clipped = VK_TRUE;	
 	vkSwapchainCreationInfo.oldSwapchain = nullptr;
 
+	vkSwapchain = VK_NULL_HANDLE;
 	if (vkCreateSwapchainKHR(vkLogicalDevice, &vkSwapchainCreationInfo, nullptr, &vkSwapchain) != VK_SUCCESS) {
+		
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
@@ -746,6 +757,34 @@ VkShaderModule VulkanContext::createShaderModule(const std::vector<uint32_t>& co
 	return vkShaderModule;
 }
 
+void VulkanContext::RecreateSwapchain()
+{
+	vkDeviceWaitIdle(vkLogicalDevice);
+
+	CleanupSwapchain();
+	CreateSwapchain();
+	CreateImageViews();
+	CreateFrameBuffers();
+}
+
+void VulkanContext::CleanupSwapchain()
+{
+	for (VkFramebuffer& vkFrameBuffer : vkSwapchainFrameBuffers)
+	{
+		vkDestroyFramebuffer(vkLogicalDevice, vkFrameBuffer, nullptr);
+	}
+
+	for (VkImageView& imageView : vkSwapchainImageViews)
+	{
+		vkDestroyImageView(vkLogicalDevice, imageView, nullptr);
+	}
+
+	vkDestroySwapchainKHR(vkLogicalDevice, vkSwapchain, nullptr);
+
+}
+
+
+
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
@@ -774,22 +813,12 @@ VulkanContext::~VulkanContext()
 
 	vkDestroyCommandPool(vkLogicalDevice, vkCommandPool, nullptr);
 
-	for (VkFramebuffer& vkFrameBuffer : vkSwapchainFrameBuffers)
-	{
-		vkDestroyFramebuffer(vkLogicalDevice, vkFrameBuffer, nullptr);
-	}
 
+	CleanupSwapchain();
 	vkDestroyPipeline(vkLogicalDevice, vkGraphicsPipeline, nullptr);
 	vkDestroyRenderPass(vkLogicalDevice, vkRenderPass, nullptr);
 	vkDestroyPipelineLayout(vkLogicalDevice, vkPipelineLayout, nullptr);
 
-	for (VkImageView& imageView : vkSwapchainImageViews)
-	{
-		vkDestroyImageView(vkLogicalDevice,imageView, nullptr);
-	}
-
-
-	vkDestroySwapchainKHR(vkLogicalDevice, vkSwapchain, nullptr);
 	vkDestroyDevice(vkLogicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);

@@ -133,17 +133,21 @@ HitInfo march_ray(vec3 rp, float tq) {
         float o = 0.02;
         new_pos.x = mod(rp.x + o/2 , o) -o/2;
         new_pos.z = mod(rp.z + o/2, o) -o/2;
-        vec2 ijp = rp.xz - new_pos.xz;
 
+        vec2 ijp = rp.xz - new_pos.xz;
+        vec2 of = o/2 *vec2(chash11(2.0 * ijp.x + 3.0 * ijp.y), chash11(5.0 * ijp.x + 2.0 * ijp.y));
+        ijp += o/2 * vec2(chash11(2.0 * ijp.x + 3.0 * ijp.y), chash11(5.0 * ijp.x + 2.0 * ijp.y));
+        /*
         float r = 0.0005;
-        vec3 sphere_pos = vec3(0, terrain(ijp, 11) - r, 0) + r/2 * vec3(chash11(2.0 * ijp.x + 3.0 * ijp.y),0, chash11(5.0 * ijp.x + 2.0 * ijp.y));
-        d1 = length((new_pos - sphere_pos) / vec3(1,3,1)) - r;
+        vec3 sphere_pos = vec3(of.x, terrain(ijp, 11) - r, of.y);
+        d1 = length((new_pos - sphere_pos) / vec3(1,2,1)) - r;
 
         if (d1 < d)
         {
             hit.dist = d1;
             hit.matID = 1;
         }
+        */
     }
     
 
@@ -275,7 +279,7 @@ vec4 get_mat_color(HitInfo info)
             c= lerp(vec4(1.0), 2*vec4(0.4,0.2,0.1,1), t);
             vec3 smooth_normal = normalize(normal(info.position,6.0));
             c = lerp(c, 2*vec4(0.07, 0.2, 0.1, 1.0), smoothstep(0.6,0.9, -smooth_normal.y));
-            //return vec4(-smooth_normal,1);
+            return vec4(-smooth_normal,1);
             break;
         case 1:
             c = vec4(0,1,0,1);

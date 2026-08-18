@@ -15,6 +15,7 @@
 #include "FileUtils.h"
 #include "GLSLangContext.h"
 #include "DEBUG.h"
+#include <ArkMat.hpp>
 
 struct QueueFamilyIndices
 {
@@ -31,6 +32,15 @@ struct SwapchainSupportDetails
 	std::vector<VkPresentModeKHR> vkPresentModes = {};
 
 	bool isSupported();
+};
+
+struct CameraUBO
+{
+	ark::Vec4 front;
+	ark::Vec4 right;
+	ark::Vec4 up;
+	ark::Vec4 pos;
+	float aspect;
 };
 
 

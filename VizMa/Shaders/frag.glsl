@@ -82,6 +82,14 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 uv;
 
+layout(binding = 0) uniform UniformBufferObject{
+    vec4 cfront;
+    vec4 cright;
+    vec4 cup;
+    vec4 pos;
+    float aspect;
+} ubo;
+
 const float NORMAL_EPSILON = 0.0001;
 const float MARCH_EPSILON = 0.01;
 const float MAX_MARCH_DIST = 5;

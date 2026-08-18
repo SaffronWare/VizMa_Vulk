@@ -8,6 +8,7 @@ set(VULKAN_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dependencies/vulkan/1.4.357.0/includ
 set(VULKAN_LIB_DIR "${CMAKE_SOURCE_DIR}/dependencies/vulkan/1.4.357.0/Lib")
 
 set(GLSLANG_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dependencies/vulkan/1.4.357.0/Include/glslang/Public")
+set(ARKMAT_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dependencies/ArkMat/src")
 
 
 add_subdirectory(VizMa)

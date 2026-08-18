@@ -16,7 +16,7 @@ target_compile_definitions(VizMa PRIVATE VIZMA_DEBUG)
 
 target_include_directories(VizMa PRIVATE ${VULKAN_INCLUDE_DIR})
 target_include_directories(VizMa PRIVATE ${GLSLANG_INCLUDE_DIR})
-
+target_include_directories(VizMa PRIVATE ${ARKMAT_INCLUDE_DIR})
 target_link_libraries(VizMa PRIVATE "${VULKAN_LIB_DIR}/vulkan-1.lib")
 target_link_libraries(VizMa PRIVATE 
             "${VULKAN_LIB_DIR}/shaderc_combined.lib"

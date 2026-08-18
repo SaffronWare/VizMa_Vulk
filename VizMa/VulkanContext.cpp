@@ -544,6 +544,8 @@ void VulkanContext::CreateGraphicsPipeline()
 
 	VkPipelineLayoutCreateInfo vkPipelineLayoutInfo{};
 	vkPipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	vkPipelineLayoutInfo.setLayoutCount = 1;
+	vkPipelineLayoutInfo.pSetLayouts = &vkDescriptorSetLayout;
 
 	if (vkCreatePipelineLayout(vkLogicalDevice, &vkPipelineLayoutInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS)
 	{
@@ -802,10 +804,55 @@ void VulkanContext::CreateDescriptorSetLayout()
 	{
 		throw std::runtime_error("Failed to create descriptor set layout!\n");
 	}
+}
 
+uint32_t VulkanContext::vkFindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const
+{
+	VkPhysicalDeviceMemoryProperties vkDevMemProperties;
+	vkGetPhysicalDeviceMemoryProperties(vkPhysicalDevice, &vkDevMemProperties);
 
+	for (uint32_t i = 0; i < vkDevMemProperties.memoryTypeCount; i++)
+	{
+		if ((typeFilter & (1 << i)) && (vkDevMemProperties.memoryTypes[i].propertyFlags & properties))
+		{
+			return i;
+		}
+	}
 
+	throw std::runtime_error("Failed to find suitable memory type! \n");
+}
 
+void VulkanContext::CreateUniformBuffers()
+{
+	VkDeviceSize vkUboSize = sizeof(CameraUBO);
+
+	VkBufferCreateInfo vkUboBufferCreateInfo{};
+	vkUboBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	vkUboBufferCreateInfo.size = vkUboSize;
+	vkUboBufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	vkUboBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	if (!vkCreateBuffer(vkLogicalDevice, &vkUboBufferCreateInfo, nullptr, &vkCameraUbo) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create camera UBo buffer\N");
+	}
+
+	VkMemoryRequirements vkUboMemRequirements;
+	vkGetBufferMemoryRequirements(vkLogicalDevice, vkCameraUbo, &vkUboMemRequirements);
+
+	VkMemoryAllocateInfo vkUboMemAllocInfo{};
+	vkUboMemAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	vkUboMemAllocInfo.allocationSize = vkUboMemRequirements.size;
+	vkUboMemAllocInfo.memoryTypeIndex = vkFindMemoryType(vkUboMemRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	if (vkAllocateMemory(vkLogicalDevice, &vkUboMemAllocInfo, nullptr, &vkCameraDevMemory) != VK_SUCCESS)
+	{
+		throw std::runtime_error("faileld to allocate memory for camera ubo\n");
+	}
+
+	vkBindBufferMemory(vkLogicalDevice, vkCameraUbo, vkCameraDevMemory, 0);
+
+	vkMapMemory(vkLogicalDevice, vkCameraDevMemory, 0, vkUboSize, 0, &vkCameraUboMemMapped);
 }
 
 
@@ -824,6 +871,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateGraphicsPipeline();
 	CreateFrameBuffers();
 	CreateCommandPool();
+	CreateUniformBuffers();
 	CreateCommandBuffer();
 	CreateSyncObjects();
 }
@@ -836,11 +884,15 @@ VulkanContext::~VulkanContext()
 	vkDestroyFence(vkLogicalDevice, vkInFlightFence, nullptr);
 
 	vkDestroyCommandPool(vkLogicalDevice, vkCommandPool, nullptr);
+	vkDestroyBuffer(vkLogicalDevice, vkCameraUbo, nullptr);
+	vkFreeMemory(vkLogicalDevice, vkCameraDevMemory, nullptr);
+	vkDestroyDescriptorSetLayout(vkLogicalDevice, vkDescriptorSetLayout, nullptr);
 
 
 	CleanupSwapchain();
 	vkDestroyPipeline(vkLogicalDevice, vkGraphicsPipeline, nullptr);
 	vkDestroyRenderPass(vkLogicalDevice, vkRenderPass, nullptr);
+	vkDestroyDescriptorSetLayout(vkLogicalDevice, vkDescriptorSetLayout, nullptr);
 	vkDestroyPipelineLayout(vkLogicalDevice, vkPipelineLayout, nullptr);
 
 	vkDestroyDevice(vkLogicalDevice, nullptr);

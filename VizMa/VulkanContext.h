@@ -66,6 +66,7 @@ private:
 	void CreateGraphicsPipeline();
 	void CreateFrameBuffers();
 	void CreateCommandPool();
+	void CreateUniformBuffers();
 	void CreateCommandBuffer();
 	void CreateSyncObjects();
 	void RecreateSwapchain();
@@ -77,6 +78,8 @@ private:
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
 	int ScorePhysicalDevice(const VkPhysicalDevice& device) const;
 
+	uint32_t vkFindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+ 
 	const Window& vkWin32Window;
 
 	QueueFamilyIndices findPhysicalDeviceQueueFamilies(const VkPhysicalDevice& device) const;
@@ -114,6 +117,10 @@ private:
 	std::vector<VkImage> vkSwapchainImages;
 	std::vector<VkImageView> vkSwapchainImageViews;
 	std::vector<VkFramebuffer> vkSwapchainFrameBuffers;
+
+	VkBuffer vkCameraUbo;
+	VkDeviceMemory vkCameraDevMemory;
+	void* vkCameraUboMemMapped;
 
 	VkSurfaceFormatKHR vkSurfaceFormat;
 	VkExtent2D vkSurfaceExtent;

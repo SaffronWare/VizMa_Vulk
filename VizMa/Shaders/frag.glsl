@@ -84,13 +84,15 @@ layout(location = 1) in vec2 uv;
 
 layout(binding = 0) uniform UniformBufferObject{
     vec3 cfront;
-    float focal;
-    vec3 cright;
-    float aspect;
-    vec3 cup;
     float pad1;
-    vec3 pos;
+    vec3 cright;
     float pad2;
+    vec3 cup;
+    float pad3;
+    vec3 pos;
+    float pad4;
+    float focal_length;
+    float aspect_ratio;
 
 } ubo;
 

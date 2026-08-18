@@ -715,6 +715,7 @@ void VulkanContext::recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIn
 	scissor.extent = vkSurfaceExtent;
 	vkCmdSetScissor(buffer, 0, 1, &scissor);
 
+	vkCmdBindDescriptorSets(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, 0, 1, &vkDescriptorSet, 0, nullptr);
 	vkCmdDraw(buffer, 3, 1, 0, 0);
 
 	vkCmdEndRenderPass(buffer);

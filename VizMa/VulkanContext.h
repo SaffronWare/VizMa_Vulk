@@ -48,7 +48,7 @@ public:
 
 private:
 
-	Camera Cam;
+	Camera Cam = Camera();
 
 
 	void PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver);

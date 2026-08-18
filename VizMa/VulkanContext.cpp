@@ -833,7 +833,7 @@ void VulkanContext::CreateUniformBuffers()
 	vkUboBufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	vkUboBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	if (!vkCreateBuffer(vkLogicalDevice, &vkUboBufferCreateInfo, nullptr, &vkCameraUbo) != VK_SUCCESS)
+	if (vkCreateBuffer(vkLogicalDevice, &vkUboBufferCreateInfo, nullptr, &vkCameraUbo) != VK_SUCCESS)
 	{
 		throw std::runtime_error("Failed to create camera UBo buffer\N");
 	}

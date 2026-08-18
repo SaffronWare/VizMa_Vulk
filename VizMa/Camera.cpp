@@ -1,7 +1,10 @@
 #include "Camera.h"
 
+const ark::Vec3 Camera::identity_front = ark::Vec3(0, 0, 1);
+const ark::Vec3 Camera::identity_right = ark::Vec3(1, 0, 0);
+const ark::Vec3 Camera::identity_up = ark::Vec3(0, 1, 0);
 
-Camera::Camera(ark::Vec3 pos = ark::Vec3(-1.0, 0.75, 0), ark::Vec3 ori = ark::Vec3(0,0,0), float focal = 1.0f, float aspect = 1.0f)
+Camera::Camera(ark::Vec3 pos, ark::Vec3 ori, float focal, float aspect)
 	: orientation(ori)
 {
 	myData = CameraDataContainer{identity_front, identity_right, identity_up, pos, focal, aspect };
@@ -47,16 +50,19 @@ ark::Vec3 Camera::getPos() const
 ark::Vec3 Camera::updPos(ark::Vec3 displacement)
 {
 	myData.pos += displacement;
+	return myData.pos;
 }
 
 float Camera::updFocal(float delta)
 {
 	myData.focal_length += delta;
+	return myData.focal_length;
 }
 
 void Camera::setPos(ark::Vec3 position)
 {
 	myData.pos = position;
+
 }
 
 void Camera::setFocal(float focal)

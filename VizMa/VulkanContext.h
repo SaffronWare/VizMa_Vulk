@@ -54,6 +54,9 @@ public:
 	void drawFrame();
 
 private:
+
+	CameraUBO CamUBO;
+
 	void PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver);
 	void CreateInstance();
 	void CreateWindowSurfaceWin32();
@@ -73,6 +76,7 @@ private:
 	void CleanupSwapchain();
 
 	void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex) const;
+	void updateUniformBuffer() const;
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;

@@ -855,6 +855,11 @@ void VulkanContext::CreateUniformBuffers()
 	vkMapMemory(vkLogicalDevice, vkCameraDevMemory, 0, vkUboSize, 0, &vkCameraUboMemMapped);
 }
 
+void VulkanContext::updateUniformBuffer()
+{
+
+}
+
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {

@@ -17,7 +17,7 @@ struct alignas(16) CameraDataContainer
 struct Camera
 {
 public:
-	Camera(ark::Vec3 pos = ark::Vec3(0, 0, 0), ark::Vec3 ori = ark::Vec3(0, 0, 0), float focal = 1.0f, float aspect = 1.0f);
+	Camera(ark::Vec3 pos = ark::Vec3(-1.0, 0.75, 0), ark::Vec3 ori = ark::Vec3(0, 0, 0), float focal = 2.0f, float aspect = 1.0f);
 	~Camera();
 
 	ark::Vec3 orientation; // x rot, y rot, z rot

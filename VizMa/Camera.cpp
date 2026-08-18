@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 
-Camera::Camera(ark::Vec3 pos = ark::Vec3(0,0,0), ark::Vec3 ori = ark::Vec3(0,0,0), float focal = 1.0f, float aspect = 1.0f)
+Camera::Camera(ark::Vec3 pos = ark::Vec3(-1.0, 0.75, 0), ark::Vec3 ori = ark::Vec3(0,0,0), float focal = 1.0f, float aspect = 1.0f)
 	: orientation(ori)
 {
 	myData = CameraDataContainer{identity_front, identity_right, identity_up, pos, focal, aspect };
@@ -12,7 +12,6 @@ Camera::Camera(ark::Vec3 pos = ark::Vec3(0,0,0), ark::Vec3 ori = ark::Vec3(0,0,0
 Camera::~Camera() {}
 
 
-// (FX)(FY)(FZ)(PAD)(RX)(RY)(RZ)(PAD)(UX)(UY)(UZ)(PAD)(PX)(PY)(PZ)(PAD)(FOCAL)(ASPECT)(PAD)(PAD)
 void Camera::writeData(void* storage) const
 {
 	std::memcpy(storage, static_cast<const void*>(&myData), sizeof(myData));

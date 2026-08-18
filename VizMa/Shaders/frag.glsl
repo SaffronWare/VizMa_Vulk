@@ -103,12 +103,13 @@ const int MAX_NUM_MARCHES = 10000;
 const float MARCH_COEFF = 0.05;
 
 
-vec3 camera_position = vec3(0.0, -0.0, -3.0) + vec3(-1, 0.75, 0);
-float focal = 2.0;
+vec3 camera_position = ubo.pos;
+float focal = ubo.focal_length;
 
-vec3 front = vec3(0.0, 0.0, 1.0);
-vec3 right = vec3(1.0, 0.0, 0.0);
-vec3 up = vec3(0.0, 1.0, 0.0);
+vec3 front = ubo.cfront;
+vec3 right = ubo.cright;
+vec3 up = ubo.cup;
+float aspect = ubo.aspect_ratio;
 
 
 struct HitInfo 

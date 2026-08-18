@@ -279,8 +279,8 @@ vec4 foghit(vec4 c, float d)
 
 vec4 fogsky(vec4 c, vec3 rd)
 {
-    float t = smoothstep(-1,1,acos(length(rd.xz)) / acos(0));
-    return lerp(c, vec4(1.0), 1 - t);
+    float t = smoothstep(0,1,acos(length(rd.xz)) / acos(-1));
+    return lerp(c, vec4(1.0), pow(1 - t, 40));
 
 }
 

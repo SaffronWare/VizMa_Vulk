@@ -885,24 +885,34 @@ void VulkanContext::updateUniformBuffer()
 		Cam.updPos(Cam.getRight() * dt * -1.0f);
 	}
 
-	if (GetAsyncKeyState('E') & 0x8000)
+	if (GetAsyncKeyState('Q') & 0x8000)
 	{
 		Cam.updPos(Cam.getUp() * dt);
 	}
 
-	if (GetAsyncKeyState('Q') & 0x8000)
+	if (GetAsyncKeyState('E') & 0x8000)
 	{
 		Cam.updPos(Cam.getUp() * dt * -1.0f);
 	}
 
-	if (GetAsyncKeyState(ARW_RIGHT) & 0x8000)
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
 	{
 		Cam.orientation.y += 0.1 * dt;
 	}
 
-	if (GetAsyncKeyState(ARW_LEFT) & 0x8000)
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
 		Cam.orientation.y -= 0.1 * dt;
+	}
+
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+	{
+		Cam.orientation.x += 0.1 * dt;
+	}
+
+	if (GetAsyncKeyState(VK_UP) & 0x8000)
+	{
+		Cam.orientation.x -= 0.1 * dt;
 	}
 
 	Cam.update();

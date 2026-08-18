@@ -313,6 +313,7 @@ vec4 get_shade(HitInfo info)
     return fogsky(col, info.rd);
 }
 
+
 void main() {
     Ray ray;
     ray.rd = normalize(right * uv.x + up * uv.y + front * focal);
@@ -322,3 +323,4 @@ void main() {
     outColor = get_shade(hit);
     
 }
+

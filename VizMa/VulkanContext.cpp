@@ -14,6 +14,8 @@ bool SwapchainSupportDetails::isSupported()
 
 void VulkanContext::drawFrame()
 {
+	updateUniformBuffer();
+
 	vkWaitForFences(vkLogicalDevice, 1, &vkInFlightFence, VK_TRUE, UINT64_MAX);
 
 	uint32_t vkSwapchainImageIndex;
@@ -814,7 +816,7 @@ uint32_t VulkanContext::vkFindMemoryType(uint32_t typeFilter, VkMemoryPropertyFl
 
 	for (uint32_t i = 0; i < vkDevMemProperties.memoryTypeCount; i++)
 	{
-		if ((typeFilter & (1 << i)) && (vkDevMemProperties.memoryTypes[i].propertyFlags & properties))
+		if ((typeFilter & (1 << i)) && ((vkDevMemProperties.memoryTypes[i].propertyFlags & properties) == properties))
 		{
 			return i;
 		}
@@ -927,6 +929,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateCommandPool();
 	CreateUniformBuffers();
 	CreateDescriptorPool();
+	CreateDescriptorSets();
 	CreateCommandBuffer();
 	CreateSyncObjects();
 }

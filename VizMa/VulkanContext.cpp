@@ -860,8 +860,55 @@ void VulkanContext::CreateUniformBuffers()
 
 void VulkanContext::updateUniformBuffer()
 {
+	static auto last_time = std::chrono::high_resolution_clock::now();
+
+	auto current_time = std::chrono::high_resolution_clock::now();
+	float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
+
+	if (GetAsyncKeyState('W') & 0x8000)
+	{
+		Cam.updPos(Cam.getFront() * dt);
+	}
+
+	if (GetAsyncKeyState('S') & 0x8000)
+	{
+		Cam.updPos(Cam.getFront() * dt * -1.0f);
+	}
+
+	if (GetAsyncKeyState('D') & 0x8000)
+	{
+		Cam.updPos(Cam.getRight() * dt);
+	}
+
+	if (GetAsyncKeyState('A') & 0x8000)
+	{
+		Cam.updPos(Cam.getRight() * dt * -1.0f);
+	}
+
+	if (GetAsyncKeyState('E') & 0x8000)
+	{
+		Cam.updPos(Cam.getUp() * dt);
+	}
+
+	if (GetAsyncKeyState('Q') & 0x8000)
+	{
+		Cam.updPos(Cam.getUp() * dt * -1.0f);
+	}
+
+	if (GetAsyncKeyState(ARW_RIGHT) & 0x8000)
+	{
+		Cam.orientation.y += 0.1 * dt;
+	}
+
+	if (GetAsyncKeyState(ARW_LEFT) & 0x8000)
+	{
+		Cam.orientation.y -= 0.1 * dt;
+	}
+
 	Cam.update();
 	Cam.writeData(vkCameraUboMemMapped);
+
+	last_time = std::chrono::high_resolution_clock::now();
 }
 
 void VulkanContext::CreateDescriptorPool()

@@ -785,6 +785,29 @@ void VulkanContext::CleanupSwapchain()
 
 
 
+void VulkanContext::CreateDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding vkCameraUboBinding{};
+	vkCameraUboBinding.binding = 0;
+	vkCameraUboBinding.descriptorCount = 1;
+	vkCameraUboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	vkCameraUboBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutCreateInfo{};
+	vkDescriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	vkDescriptorSetLayoutCreateInfo.bindingCount = 1;
+	vkDescriptorSetLayoutCreateInfo.pBindings = &vkCameraUboBinding;
+
+	if (vkCreateDescriptorSetLayout(vkLogicalDevice, &vkDescriptorSetLayoutCreateInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create descriptor set layout!\n");
+	}
+
+
+
+
+}
+
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
@@ -797,6 +820,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateSwapchain();
 	CreateImageViews();
 	CreateRenderPass();
+	CreateDescriptorSetLayout();
 	CreateGraphicsPipeline();
 	CreateFrameBuffers();
 	CreateCommandPool();

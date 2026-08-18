@@ -62,6 +62,7 @@ private:
 	void CreateSwapchain();
 	void CreateImageViews();
 	void CreateRenderPass();
+	void CreateDescriptorSetLayout();
 	void CreateGraphicsPipeline();
 	void CreateFrameBuffers();
 	void CreateCommandPool();
@@ -97,6 +98,7 @@ private:
 	VkQueue vkPresentQueue = VK_NULL_HANDLE;
 	VkSwapchainKHR vkSwapchain = VK_NULL_HANDLE;
 	VkRenderPass vkRenderPass = VK_NULL_HANDLE;
+	VkDescriptorSetLayout vkDescriptorSetLayout;
 	VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 	VkPipeline vkGraphicsPipeline = VK_NULL_HANDLE;
 	VkCommandPool vkCommandPool = VK_NULL_HANDLE;

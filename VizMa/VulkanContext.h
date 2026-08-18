@@ -15,6 +15,7 @@
 #include "FileUtils.h"
 #include "GLSLangContext.h"
 #include "DEBUG.h"
+#include "Camera.h"
 #include <ArkMat.hpp>
 
 struct QueueFamilyIndices
@@ -34,14 +35,6 @@ struct SwapchainSupportDetails
 	bool isSupported();
 };
 
-struct CameraUBO
-{
-	ark::Vec4 front; // last comp is focal
-	ark::Vec4 right; // last comp is aspect
-	ark::Vec4 up; // last comp is padding
-	ark::Vec4 pos; // last comp is badding for 16 byte alignement
-};
-
 
 class VulkanContext
 {
@@ -55,7 +48,8 @@ public:
 
 private:
 
-	CameraUBO CamUBO;
+	Camera Cam;
+
 
 	void PopulateAppInfo(const char* title, int version_major, int version_minor, int sub_ver);
 	void CreateInstance();
@@ -70,13 +64,15 @@ private:
 	void CreateFrameBuffers();
 	void CreateCommandPool();
 	void CreateUniformBuffers();
+	void CreateDescriptorPool();
+	void CreateDescriptorSets();
 	void CreateCommandBuffer();
 	void CreateSyncObjects();
 	void RecreateSwapchain();
 	void CleanupSwapchain();
 
 	void recordCommandBuffer(VkCommandBuffer buffer, uint32_t imageIndex) const;
-	void updateUniformBuffer() const;
+	void updateUniformBuffer();
 
 	bool IsPhysicalDeviceValid(const VkPhysicalDevice& device) const;
 	bool IsCompletePhysicalDeviceExtensions(const VkPhysicalDevice& device) const;
@@ -105,7 +101,6 @@ private:
 	VkQueue vkPresentQueue = VK_NULL_HANDLE;
 	VkSwapchainKHR vkSwapchain = VK_NULL_HANDLE;
 	VkRenderPass vkRenderPass = VK_NULL_HANDLE;
-	VkDescriptorSetLayout vkDescriptorSetLayout;
 	VkPipelineLayout vkPipelineLayout = VK_NULL_HANDLE;
 	VkPipeline vkGraphicsPipeline = VK_NULL_HANDLE;
 	VkCommandPool vkCommandPool = VK_NULL_HANDLE;
@@ -113,6 +108,9 @@ private:
 	VkSemaphore vkImageReadySemaphore = VK_NULL_HANDLE;
 	VkSemaphore vkRenderFinishedSemaphore = VK_NULL_HANDLE;
 	VkFence vkInFlightFence = VK_NULL_HANDLE;
+	VkDescriptorSetLayout vkDescriptorSetLayout = VK_NULL_HANDLE;
+	VkDescriptorPool vkDescriptorPool = VK_NULL_HANDLE;
+	VkDescriptorSet vkDescriptorSet = VK_NULL_HANDLE;
 
 
 	std::vector<const char*> vkRequiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};

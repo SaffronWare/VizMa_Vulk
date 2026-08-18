@@ -824,7 +824,7 @@ uint32_t VulkanContext::vkFindMemoryType(uint32_t typeFilter, VkMemoryPropertyFl
 
 void VulkanContext::CreateUniformBuffers()
 {
-	VkDeviceSize vkUboSize = sizeof(CameraUBO);
+	VkDeviceSize vkUboSize = sizeof(CameraDataContainer);
 
 	VkBufferCreateInfo vkUboBufferCreateInfo{};
 	vkUboBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -857,9 +857,57 @@ void VulkanContext::CreateUniformBuffers()
 
 void VulkanContext::updateUniformBuffer()
 {
-
+	Cam.update();
+	Cam.writeData(vkCameraUboMemMapped);
 }
 
+void VulkanContext::CreateDescriptorPool()
+{
+	VkDescriptorPoolSize vkPoolSize{};
+	vkPoolSize.descriptorCount = 1;
+	vkPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+	VkDescriptorPoolCreateInfo vkPoolCreateInfo{};
+	vkPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	vkPoolCreateInfo.maxSets = 1;
+	vkPoolCreateInfo.poolSizeCount = 1;
+	vkPoolCreateInfo.pPoolSizes = &vkPoolSize;
+
+	if (vkCreateDescriptorPool(vkLogicalDevice, &vkPoolCreateInfo, nullptr, &vkDescriptorPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create descriptor pool!\n");
+	}
+}
+
+void VulkanContext::CreateDescriptorSets()
+{
+	VkDescriptorSetAllocateInfo vkDescSetAllocInfo{};
+	vkDescSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	vkDescSetAllocInfo.descriptorSetCount = 1;
+	vkDescSetAllocInfo.descriptorPool = vkDescriptorPool;
+	vkDescSetAllocInfo.pSetLayouts = &vkDescriptorSetLayout;
+	
+	if (vkAllocateDescriptorSets(vkLogicalDevice, &vkDescSetAllocInfo, &vkDescriptorSet) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create descriptor sets!\n");
+	}
+
+	VkDescriptorBufferInfo vkDescBuffInfo{};
+	vkDescBuffInfo.buffer = vkCameraUbo;
+	vkDescBuffInfo.offset = 0;
+	vkDescBuffInfo.range = sizeof(CameraDataContainer);
+
+	VkWriteDescriptorSet vkDescSetWrite{};
+	vkDescSetWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	vkDescSetWrite.dstSet = vkDescriptorSet;
+	vkDescSetWrite.dstBinding = 0;
+	vkDescSetWrite.dstArrayElement = 0;
+	vkDescSetWrite.descriptorCount = 1;
+	vkDescSetWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	vkDescSetWrite.pBufferInfo = &vkDescBuffInfo;
+
+	vkUpdateDescriptorSets(vkLogicalDevice, 1, &vkDescSetWrite, 0, nullptr);
+}
 
 VulkanContext::VulkanContext(const Window& window, const char* title, int version_major, int version_minor, int sub_ver) : vkWin32Window(window)
 {
@@ -877,6 +925,7 @@ VulkanContext::VulkanContext(const Window& window, const char* title, int versio
 	CreateFrameBuffers();
 	CreateCommandPool();
 	CreateUniformBuffers();
+	CreateDescriptorPool();
 	CreateCommandBuffer();
 	CreateSyncObjects();
 }
@@ -891,6 +940,7 @@ VulkanContext::~VulkanContext()
 	vkDestroyCommandPool(vkLogicalDevice, vkCommandPool, nullptr);
 	vkDestroyBuffer(vkLogicalDevice, vkCameraUbo, nullptr);
 	vkFreeMemory(vkLogicalDevice, vkCameraDevMemory, nullptr);
+	vkDestroyDescriptorPool(vkLogicalDevice, vkDescriptorPool, nullptr);
 	vkDestroyDescriptorSetLayout(vkLogicalDevice, vkDescriptorSetLayout, nullptr);
 
 
@@ -903,6 +953,4 @@ VulkanContext::~VulkanContext()
 	vkDestroyDevice(vkLogicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
-	
-
 }

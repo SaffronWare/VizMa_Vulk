@@ -36,11 +36,10 @@ struct SwapchainSupportDetails
 
 struct CameraUBO
 {
-	ark::Vec4 front;
-	ark::Vec4 right;
-	ark::Vec4 up;
-	ark::Vec4 pos;
-	float aspect;
+	ark::Vec4 front; // last comp is focal
+	ark::Vec4 right; // last comp is aspect
+	ark::Vec4 up; // last comp is padding
+	ark::Vec4 pos; // last comp is badding for 16 byte alignement
 };
 
 

@@ -83,11 +83,15 @@ layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 uv;
 
 layout(binding = 0) uniform UniformBufferObject{
-    vec4 cfront;
-    vec4 cright;
-    vec4 cup;
-    vec4 pos;
+    vec3 cfront;
+    float focal;
+    vec3 cright;
     float aspect;
+    vec3 cup;
+    float pad1;
+    vec3 pos;
+    float pad2;
+
 } ubo;
 
 const float NORMAL_EPSILON = 0.0001;

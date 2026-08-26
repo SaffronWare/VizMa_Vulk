@@ -19,6 +19,22 @@ float scubic(float t)
     return 3*t*t - 2 * t*t*t;
 }
 
+float tmod(float a, float b)
+{
+    return mod(a+b/2, b) - b/2;
+}
+
+vec2 tmod(vec2 a, vec2 b)
+{
+    return mod(a+b/2, b) - b/2;
+}
+
+
+vec3 tmod(vec3 a, vec3 b)
+{
+    return mod(a + b/2, b) - b/2;
+}
+
 
 float noise_value_plane(int seed, vec2 p)
 {
@@ -135,6 +151,7 @@ struct Ray {
 
 
 HitInfo march_ray(vec3 rp, float tq) {
+    vec3 base_pos = rp;
     HitInfo hit;
     //rp += vec3(-1, 0.75, 0);
     tq *= float(exp(-0.04 * length(rp-camera_position)));
@@ -144,30 +161,25 @@ HitInfo march_ray(vec3 rp, float tq) {
     hit.dist = d;
     hit.matID = 0;
 
+
+    const float bsr = 0.01;
+    const float o = 0.03;
+
     float d1 = 0;
-    //vec3 new_pos = vec3(mod(rp.x - 1.0, 2.0), rp.y, mod(rp.z,2.0));
-    if (rp.z > -4.0)
+    vec3 p1 = rp;
+    vec3 tiled_p1 = p1;
+    tiled_p1.xz = tmod(tiled_p1.xz, vec2(o));
+    vec2 tile_center = p1.xz - tiled_p1.xz;
+    tiled_p1.y -= terrain(tile_center, int(tq)) - bsr * 3.0 / 2;
+    tiled_p1.y /= 3.0;
+    d1 = length(tiled_p1) - bsr;
+
+    if (d1 < d)
     {
-        vec3 new_pos = rp;
-        float o = 0.02;
-        new_pos.x = mod(rp.x + o/2 , o) -o/2;
-        new_pos.z = mod(rp.z + o/2, o) -o/2;
-
-        vec2 ijp = rp.xz - new_pos.xz;
-        vec2 of = o/2 *vec2(chash11(2.0 * ijp.x + 3.0 * ijp.y), chash11(5.0 * ijp.x + 2.0 * ijp.y));
-        ijp += o/2 * vec2(chash11(2.0 * ijp.x + 3.0 * ijp.y), chash11(5.0 * ijp.x + 2.0 * ijp.y));
-        /*
-        float r = 0.0005;
-        vec3 sphere_pos = vec3(of.x, terrain(ijp, 11) - r, of.y);
-        d1 = length((new_pos - sphere_pos) / vec3(1,2,1)) - r;
-
-        if (d1 < d)
-        {
-            hit.dist = d1;
-            hit.matID = 1;
-        }
-        */
+        hit.dist = d1;
+        hit.matID = 1;
     }
+
     
 
     //hit.dist *= 0.05;
@@ -283,7 +295,7 @@ vec4 sky(HitInfo info)
 
 vec4 foghit(vec4 c, float d)
 {
-    vec4 t= vec4(1) - exp(-0.1 * vec4(1.0, 1.0, 1.7, 0.0) * d);
+    vec4 t= vec4(1) - exp(-0.1 * vec4(1.0, 1.3, 1.7, 0.0) * d);
     return lerp(c, vec4(1.0), t);
 }
 

@@ -6,7 +6,7 @@ vec2 rotate(vec2 p, float t)
     float s = sin(t);
     return vec2(p.x * c - p.y * s, p.x * s + p.y * c);
 }
-
+// between 0 and 1
 float chash11(float p) {
     p = fract(p * .1031);
     p *= p + 33.33;
@@ -52,7 +52,7 @@ float terrain(vec2 xz, int quality)
     float ty = 0;
     //xz /= 1.4;
     float a = 1.0f;
-    float theta = 0.0f;
+    float theta = 0.4f;
 
     for (int i = 0; i < quality; i++)
     {
@@ -62,19 +62,23 @@ float terrain(vec2 xz, int quality)
         a /= 2.3;
         xz *= 2.0;
     }
+    // series for gradient is 1 + 2.0/2.3 + 
+    // 1.5x cus cubic
 
     return ty;
 }
-
+const float max_slope = 10.0;
+const float bounding_constant = 1.0 / sqrt(1+max_slope*max_slope);
 float terrainSDF(vec3 p, int quality)
 {
-
+    // our noise function whcih has a max slop;e of roughly 7.666...
+    
     if (abs(p.y) > 2)
     {
         return abs(p.y) - 1;
     }
 
-    return -(p.y - terrain(p.xz, quality));
+    return -(p.y - terrain(p.xz, quality)) * bounding_constant;
 }
 
 layout(location = 0) out vec4 outColor;
@@ -97,10 +101,10 @@ layout(binding = 0) uniform UniformBufferObject{
 } ubo;
 
 const float NORMAL_EPSILON = 0.0001;
-const float MARCH_EPSILON = 0.01;
+const float MARCH_EPSILON = 0.001;
 const float MAX_MARCH_DIST = 5;
 const int MAX_NUM_MARCHES = 10000;
-const float MARCH_COEFF = 0.05;
+const float MARCH_COEFF = 1.0;
 
 
 vec3 camera_position = ubo.pos;
@@ -166,6 +170,7 @@ HitInfo march_ray(vec3 rp, float tq) {
     }
     
 
+    //hit.dist *= 0.05;
     hit.hit = (hit.dist < MARCH_EPSILON);
     return hit;
 }
@@ -232,16 +237,21 @@ float norm_shade(HitInfo info)
 {   
     Ray outray;
     outray.rd = light_dir;
-    outray.rp = info.position + outray.rd * 2 * MARCH_EPSILON;
+    outray.rp = info.position + outray.rd * 10.0f * MARCH_EPSILON;
     
     if (!getHit(outray).hit)
     {
         return max(ambient, diffuse * dot(info.normal,light_dir));
     }
-    return ambient;
+    return ambient + 0.07 * diffuse * dot(info.normal, light_dir);
 }
 
 vec4 lerp(vec4 a, vec4 b, float t)
+{
+    return a * (1-t) + b*t;
+}
+
+vec4 lerp(vec4 a, vec4 b, vec4 t)
 {
     return a * (1-t) + b*t;
 }
@@ -273,7 +283,7 @@ vec4 sky(HitInfo info)
 
 vec4 foghit(vec4 c, float d)
 {
-    float t= 1-exp(-0.005 * d);
+    vec4 t= vec4(1) - exp(-0.1 * vec4(1.0, 1.0, 1.7, 0.0) * d);
     return lerp(c, vec4(1.0), t);
 }
 
@@ -294,7 +304,7 @@ vec4 get_mat_color(HitInfo info)
             c= lerp(vec4(1.0), 2*vec4(0.4,0.2,0.1,1), t);
             vec3 smooth_normal = normalize(normal(info.position,6.0));
             c = lerp(c, 2*vec4(0.07, 0.2, 0.1, 1.0), smoothstep(0.6,0.9, -smooth_normal.y));
-            return vec4(-smooth_normal,1);
+            return vec4(-smooth_normal.y);
             break;
         case 1:
             c = vec4(0,1,0,1);
@@ -320,7 +330,18 @@ void main() {
     ray.rp = camera_position;
 
     HitInfo hit = getHit(ray);
+   
     outColor = get_shade(hit);
     
+    /*
+    if (!hit.hit)
+    {
+        //outColor = vec4(0.0);
+    }
+    else
+    {
+        //outColor = vec4(hit.normal,1);
+    }
+    */
 }
 

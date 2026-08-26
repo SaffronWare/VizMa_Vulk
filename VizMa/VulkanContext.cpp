@@ -861,6 +861,8 @@ void VulkanContext::CreateUniformBuffers()
 void VulkanContext::updateUniformBuffer()
 {
 	static auto last_time = std::chrono::high_resolution_clock::now();
+	static POINT winLastCursorPos;
+	
 
 	auto current_time = std::chrono::high_resolution_clock::now();
 	float dt = std::chrono::duration<float, std::chrono::seconds::period>(current_time - last_time).count();
@@ -897,23 +899,34 @@ void VulkanContext::updateUniformBuffer()
 
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
 	{
-		Cam.orientation.y += 0.1 * dt;
+		Cam.orientation.y -= 0.5 * dt;
 	}
 
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
-		Cam.orientation.y -= 0.1 * dt;
+		Cam.orientation.y += 0.5 * dt;
 	}
 
 	if (GetAsyncKeyState(VK_DOWN) & 0x8000)
 	{
-		Cam.orientation.x += 0.1 * dt;
+		Cam.orientation.x += 0.5 * dt;
 	}
 
 	if (GetAsyncKeyState(VK_UP) & 0x8000)
 	{
-		Cam.orientation.x -= 0.1 * dt;
+		Cam.orientation.x -= 0.5 * dt;
 	}
+
+	POINT winCursorPos;
+	GetCursorPos(&winCursorPos);
+
+	Cam.orientation.y -= (winCursorPos.x - winLastCursorPos.x) * 0.01f;
+	Cam.orientation.x += (winCursorPos.y - winLastCursorPos.y) * 0.01f;
+
+	winLastCursorPos = winCursorPos;
+	
+	
+
 
 	Cam.update();
 	Cam.writeData(vkCameraUboMemMapped);
